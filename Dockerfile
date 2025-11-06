@@ -28,7 +28,7 @@ FROM dockerproxy.com/library/nginx:alpine
 RUN rm -rf /usr/share/nginx/html/*
 
 # Copiar los archivos construidos en la fase anterior al servidor Nginx
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=build /app/build /usr/share/nginx/html
 
 # Exponer el puerto donde correrá la aplicación
 EXPOSE 80
