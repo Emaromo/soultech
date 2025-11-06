@@ -57,12 +57,12 @@ const ClientsSection = () => {
     },
     {
       title: "Panel para Profesionales",
-      images: ["/psico.png", "/img3.jpg", "/Captur3.png"],
+      images: ["/psico.jpg", "/img3.jpg", "/Captur3.png"],
       desc: "Dashboard para técnicos, psicólogos o entrenadores con seguimiento de clientes.",
     },
     {
       title: "Landing Page Empresarial",
-      images: ["/tiket1.png", "/dashclient.png", "/login.png"],
+      images: ["/tiket1.jpg", "/dashclient.jpg", "/login.jpg"],
       desc: "Diseño moderno y optimizado para captar clientes desde la web.",
     },
   ];
