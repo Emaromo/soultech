@@ -57,7 +57,7 @@ const ClientsSection = () => {
     },
     {
       title: "Panel para Profesionales",
-      images: ["/psico.jpg", "/img3.jpg", "/Captur3.png"],
+      images: ["/psico.jpg", "/img3.jpg", ],
       desc: "Dashboard para técnicos, psicólogos o entrenadores con seguimiento de clientes.",
     },
     {

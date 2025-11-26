@@ -17,7 +17,11 @@ const slides = [
         Cloud Computing
       </span>
     ),
-    subtitle: "Infraestructura escalable y segura",
+     subtitle: (
+  <span className="text-green-300 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.9)]">
+    Infraestructura escalable y segura
+  </span>
+),
     description:
       "Soluciones en la nube cristalinas como el hielo, brindando potencia, escalabilidad y fiabilidad para tu negocio.",
     color: "from-cyan-500 to-blue-600",
@@ -38,7 +42,12 @@ const slides = [
         Ciberseguridad Avanzada
       </span>
     ),
-    subtitle: "Protección impenetrable",
+    
+    subtitle: (
+  <span className="text-green-300 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.9)]">
+    Protección impenetrable
+  </span>
+),
     description:
       "Fortalezas digitales para tus datos. Auditorías, cifrado y monitoreo continuo con tecnología de vanguardia.",
     color: "from-purple-500 to-blue-600",
@@ -59,7 +68,11 @@ const slides = [
         Inteligencia Artificial
       </span>
     ),
-    subtitle: "Automatización Inteligente",
+   subtitle: (
+  <span className="text-green-300 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.9)]">
+    Automatización Inteligente
+  </span>
+),
     description:
       "Integramos IA para optimizar tus procesos, mejorar la toma de decisiones y potenciar tus resultados.",
     color: "from-cyan-400 to-purple-500",
@@ -80,7 +93,12 @@ const slides = [
         Diseño UI/UX
       </span>
     ),
-    subtitle: "Experiencias visuales y funcionales",
+   
+    subtitle: (
+  <span className="text-green-300 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.9)]">
+    Experiencias visuales y funcionales
+  </span>
+),
     description:
       "Transformamos ideas innovadoras en experiencias de marca impactantes que inspiran, generan confianza y conectan con tus clientes.",
     color: "from-cyan-500 to-purple-600",
@@ -101,7 +119,12 @@ const slides = [
         Apps Multiplataforma
       </span>
     ),
-    subtitle: "Experiencias nativas y responsivas",
+    subtitle: (
+  <span className="text-green-300 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.9)]">
+    Experiencias visuales y funcionales
+  </span>
+),
+    
     description:
       "Desarrollamos aplicaciones modernas que funcionan perfectamente en cualquier dispositivo.",
     color: "from-blue-500 to-cyan-400",
@@ -153,9 +176,9 @@ const HeroSection = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1 }}
           >
-            Aplicaciones a Medida
+            Aplicaciones a medida
             <br />
-            <span >para tu Negocio</span>
+            <span >para tu negocio</span>
           </motion.h1>
 
           <motion.p
