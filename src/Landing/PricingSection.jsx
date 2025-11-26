@@ -74,7 +74,16 @@ const PricingSection = () => {
               ))}
             </div>
 
-            <button className="w-full glass-panel px-6 py-3 rounded-lg text-white font-semibold hover:bg-cyan-500/20 transition-all duration-300 neon-border">
+            {/* === BOTÓN WHATSAPP === */}
+            <button
+              onClick={() =>
+                window.open(
+                  "https://wa.me/5493516325887?text=Hola%2C%20estoy%20interesado%20en%20el%20plan%20Aplicaci%C3%B3n%20a%20Medida.%20%F0%9F%94%A7",
+                  "_blank"
+                )
+              }
+              className="w-full glass-panel px-6 py-3 rounded-lg text-white font-semibold hover:bg-cyan-500/20 transition-all duration-300 neon-border"
+            >
               Solicitar Cotización
             </button>
 
@@ -136,7 +145,16 @@ const PricingSection = () => {
               ))}
             </div>
 
-            <button className="w-full glass-panel px-6 py-3 rounded-lg text-white font-semibold hover:bg-purple-500/20 transition-all duration-300 neon-border">
+            {/* === BOTÓN WHATSAPP === */}
+            <button
+              onClick={() =>
+                window.open(
+                  "https://wa.me/5493516325887?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20el%20plan%20Aplicaci%C3%B3n%20Compartida.%20%F0%9F%9B%92",
+                  "_blank"
+                )
+              }
+              className="w-full glass-panel px-6 py-3 rounded-lg text-white font-semibold hover:bg-purple-500/20 transition-all duration-300 neon-border"
+            >
               Comenzar Suscripción
             </button>
 
@@ -197,7 +215,16 @@ const PricingSection = () => {
               ))}
             </div>
 
-            <button className="w-full glass-panel px-6 py-3 rounded-lg text-white font-semibold hover:bg-green-500/20 transition-all duration-300 neon-border">
+            {/* === BOTÓN WHATSAPP === */}
+            <button
+              onClick={() =>
+                window.open(
+                  "https://wa.me/5493516325887?text=Hola%2C%20me%20gustar%C3%ADa%20crear%20una%20Landing%20Page.%20%F0%9F%8C%90",
+                  "_blank"
+                )
+              }
+              className="w-full glass-panel px-6 py-3 rounded-lg text-white font-semibold hover:bg-green-500/20 transition-all duration-300 neon-border"
+            >
               Crear Landing Page
             </button>
 
@@ -212,7 +239,7 @@ const PricingSection = () => {
           </div>
         </div>
 
-        {/* === TABLA RESUMEN COMPARATIVO (oculta en mobile) === */}
+        {/* === TABLA RESUMEN COMPARATIVO === */}
         <div className="mt-16 slide-in-up hidden md:block">
           <h3 className="text-2xl font-bold text-white text-center mb-8 glow-text">
             Resumen Comparativo
