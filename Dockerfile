@@ -1,7 +1,7 @@
 # ============================
 # 🧱 FASE 1: Construcción del proyecto React
 # ============================
-FROM dockerproxy.com/library/node:18-alpine AS build
+FROM node:18-alpine AS build
 
 # Carpeta de trabajo dentro del contenedor
 WORKDIR /app
@@ -22,7 +22,7 @@ RUN npm run build
 # ============================
 # 🚀 FASE 2: Servidor web (Nginx)
 # ============================
-FROM dockerproxy.com/library/nginx:alpine
+FROM nginx:alpine
 
 # Limpiar la carpeta por defecto de Nginx
 RUN rm -rf /usr/share/nginx/html/*
