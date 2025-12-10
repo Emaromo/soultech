@@ -140,7 +140,7 @@ const ContactSection = () => {
 
                 <div className="flex items-center gap-3">
                   <Mail className="w-6 h-6 text-cyan-400" />
-                  <p>techsolutions@gmail.com</p>
+                  <p>techsolution@gmail.com</p>
                 </div>
 
                 <div className="flex items-center gap-3">
