@@ -1,308 +1,246 @@
 import React from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import useCoverflow from "./useCoverflow";
+import AmbientParticles from "./AmbientParticles";
+import SectionBackdrop from "./SectionBackdrop";
+import { GlassReflection, GlassContactLight, GlassFloor } from "./GlassCard";
+import IndustryGrid from "./IndustryGrid";
+import { WHATSAPP_NUMBER } from "./whatsappConfig";
+
+const WA = WHATSAPP_NUMBER;
+
+const industries = [
+  {
+    id: "profesionales",
+    icon: "Stethoscope",
+    title: "Profesionales",
+    eyebrow: "SALUD · CONTADORES · ABOGADOS",
+    description: "Sitios que transmiten confianza y convierten consultas en clientes.",
+    pill: "Más presencia, más confianza",
+    whatsappMessage: "Hola! Soy profesional y quiero una web para mi consultorio/estudio. ¿Me pasás info?",
+  },
+  {
+    id: "tiendas-online",
+    icon: "ShoppingBag",
+    title: "Tiendas Online",
+    eyebrow: "E-COMMERCE · CATÁLOGOS",
+    description: "Vendé tus productos de forma segura, simple y profesional.",
+    pill: "Más ventas, más crecimiento",
+    whatsappMessage: "Hola! Quiero armar mi tienda online. ¿Me pasás info?",
+  },
+  {
+    id: "gimnasios",
+    icon: "Dumbbell",
+    title: "Gimnasios y Entrenadores",
+    eyebrow: "FITNESS · BIENESTAR",
+    description: "Más alumnos y reservas con un sitio que refleja tu profesionalismo.",
+    pill: "Más reservas, más resultados",
+    whatsappMessage: "Hola! Tengo un gimnasio y quiero una web para conseguir más alumnos. ¿Me pasás info?",
+  },
+  {
+    id: "empresas",
+    icon: "Building2",
+    title: "Empresas y Servicios",
+    eyebrow: "B2B · CORPORATIVO",
+    description: "Mostrá tu empresa y generá credibilidad desde el primer clic.",
+    pill: "Más credibilidad, más oportunidades",
+    whatsappMessage: "Hola! Busco una web para mi empresa. ¿Me pasás info?",
+  },
+  {
+    id: "estetica",
+    icon: "Scissors",
+    title: "Estética y Belleza",
+    eyebrow: "SALONES · SPA · BARBERÍAS",
+    description: "Agendá turnos, mostrá tus tratamientos y destacá tu marca.",
+    pill: "Más turnos, más clientes felices",
+    whatsappMessage: "Hola! Tengo un salón/centro de estética y quiero una web con turnos. ¿Me pasás info?",
+  },
+  {
+    id: "restaurantes",
+    icon: "UtensilsCrossed",
+    title: "Restaurantes y Cafeterías",
+    eyebrow: "GASTRONOMÍA · DELIVERY",
+    description: "Mostrá tu menú, recibí reservas y hacé que más clientes te elijan.",
+    pill: "Más reservas, más comensales",
+    whatsappMessage: "Hola! Tengo un restaurante y quiero una web con menú y reservas. ¿Me pasás info?",
+  },
+];
+
+const plans = [
+  {
+    badge: "EXCLUSIVO",
+    badgeBg: "linear-gradient(135deg,#06b6d4,#22d3ee)",
+    badgeColor: "#031418",
+    accent: "#22d3ee",
+    glow: "34,211,238",
+    btnBg: "linear-gradient(135deg,#06b6d4,#2563eb)",
+    title: "Aplicación a Medida",
+    tagline: "Software 100% propio, diseñado desde cero para tu operación.",
+    price: "Costo inicial",
+    priceNote: "+ mensualidad de soporte y evolución",
+    href: `https://wa.me/${WA}?text=${encodeURIComponent("¡Hola! Me interesa el plan Aplicación a Medida")}`,
+    features: ["Desarrollo exclusivo para tu negocio", "Dashboard para tus clientes", "Dashboard de administración", "Landing page incluida", "Dominio gratis por 1 año", "Actualizaciones mensuales"],
+  },
+  {
+    badge: "POPULAR",
+    badgeBg: "linear-gradient(135deg,#a855f7,#c084fc)",
+    badgeColor: "#1c0530",
+    accent: "#c084fc",
+    glow: "168,85,247",
+    btnBg: "linear-gradient(135deg,#a855f7,#7c3aed)",
+    title: "Aplicación Compartida",
+    tagline: "Accedé a un sistema probado y en constante evolución.",
+    price: "Sin costo inicial",
+    priceNote: "suscripción mensual",
+    href: `https://wa.me/${WA}?text=${encodeURIComponent("¡Hola! Me interesa el plan Aplicación Compartida")}`,
+    features: ["Acceso a un sistema ya desarrollado", "Dashboard para tus clientes", "Dashboard de administración", "Actualizaciones y mejoras continuas"],
+  },
+  {
+    badge: "BÁSICO",
+    badgeBg: "linear-gradient(135deg,#22c55e,#4ade80)",
+    badgeColor: "#03180a",
+    accent: "#4ade80",
+    glow: "74,222,128",
+    btnBg: "linear-gradient(135deg,#22c55e,#16a34a)",
+    title: "Landing Page",
+    tagline: "Tu presencia digital profesional, lista para convertir.",
+    price: "Costo inicial",
+    priceNote: "+ mantenimiento semestral",
+    href: `https://wa.me/${WA}?text=${encodeURIComponent("¡Hola! Me interesa el plan Landing Page")}`,
+    features: ["Página profesional a medida", "Formulario de contacto", "Integración con WhatsApp", "Dominio incluido por 6 meses"],
+  },
+];
 
 const PricingSection = () => {
-  return (
-    <section id="precios" className="py-20 futuristic-bg relative">
-      {/* === EFECTOS VISUALES DE FONDO === */}
-      <div className="geometric-shapes">
-        <div className="shape square-1"></div>
-        <div className="shape square-2"></div>
-        <div className="shape circle-1"></div>
-        <div className="shape triangle-1"></div>
-      </div>
+  const { containerRef, activeIndex, next, prev, goTo } = useCoverflow(plans.length, 1, { loop: false, autoplay: false });
 
-      <div className="container mx-auto px-6 relative z-10">
-        {/* === TÍTULO PRINCIPAL === */}
-        <div className="text-center mb-16 slide-in-down">
-          <h2 className="text-4xl font-bold text-white mb-4 glow-text">
+  return (
+    <section id="precios" className="relative overflow-hidden py-28 px-6" style={{ scrollMarginTop: 80 }}>
+      <SectionBackdrop variant="carousel" vignette={0.95} />
+      <AmbientParticles count={16} seed={3000} />
+      <div className="relative max-w-6xl mx-auto">
+        <div className="text-center mb-14" data-reveal>
+          <h2 className="text-4xl font-extrabold text-white mb-3" style={{ textShadow: "0 0 28px rgba(0,255,255,0.35)" }}>
             Planes y Servicios
           </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto fade-in">
-            Soluciones flexibles con actualizaciones mensuales para mantener tu
-            aplicación siempre al día
-          </p>
+          <p className="text-gray-400 text-lg">Elegí el modelo que mejor se adapte a tu etapa y presupuesto.</p>
         </div>
 
-        {/* === CONTENEDOR DE PLANES === */}
-        <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto perspective-container">
-          {/* 🧩 Plan 1: Aplicación a Medida */}
+        <IndustryGrid title="¿Cuál es tu rubro?" items={industries} loop={false} autoplay={false} />
+
+        <h3 className="text-center text-2xl font-bold text-white mt-14 mb-10">Nuestros planes</h3>
+
+        <div id="planes-carousel" className="relative" style={{ scrollMarginTop: 100 }}>
+          <div className="ds-carousel-halo" aria-hidden="true" />
+
           <div
-            className="glass-panel panel-3d p-8 rounded-xl relative overflow-hidden 
-            hover:scale-105 hover:shadow-cyan-500/40 transition-all duration-500 
-            slide-in-left"
-            style={{ animationDelay: "3.5s", animationFillMode: "backwards" }}
+            ref={containerRef}
+            role="region"
+            aria-roledescription="carousel"
+            aria-label="Planes y servicios"
+            tabIndex={0}
+            className="relative outline-none touch-pan-y select-none"
+            style={{ height: 560, perspective: 1000, transformStyle: "preserve-3d", cursor: "grab" }}
           >
-            <div className="absolute top-0 right-0 bg-gradient-to-l from-cyan-500 to-blue-600 text-white px-4 py-2 rounded-bl-lg text-sm font-semibold">
-              🔧 EXCLUSIVO
-            </div>
-            <div className="mb-6">
-              <h3 className="text-2xl font-bold text-white mb-2 glow-text">
-                Aplicación a Medida
-              </h3>
-              <p className="text-gray-300 text-sm">
-                Solución única y personalizada
-              </p>
-            </div>
-
-            <div className="mb-6 fade-in" style={{ animationDelay: "3.8s" }}>
-              <div className="text-3xl font-bold text-cyan-400 mb-2"></div>
-              <div className="text-sm text-gray-400">Costo inicial</div>
-              <div className="text-xl font-semibold text-white mt-2"></div>
-              <div className="text-sm text-gray-400">
-                Mensualidad según complejidad
-              </div>
-            </div>
-
-            <div
-              className="space-y-3 mb-8 slide-in-up"
-              style={{ animationDelay: "4s" }}
-            >
-              {[
-                "Desarrollo exclusivo y hecho a medida",
-                "Client Dashboard (panel del cliente)",
-                "Admin Dashboard (panel administrativo)",
-                "Landing Page de presentación incluida",
-                "Dominio gratis por un año",
-                "Actualizaciones mensuales incluidas",
-              ].map((item, i) => (
-                <div key={i} className="flex items-start space-x-3">
-                  <div className="w-5 h-5 rounded-full bg-cyan-500/20 flex items-center justify-center mt-0.5">
-                    <div className="w-2 h-2 rounded-full bg-cyan-400"></div>
+            {plans.map((p, i) => {
+              const faceStyle = { padding: "30px 28px", minHeight: 470 };
+              // Mismo contenido en la cara real y en el reflejo (ver
+              // GlassReflection): badge, título, precio, features y CTA.
+              const cardContent = (
+                <>
+                  <span
+                    className="self-start text-[11px] font-extrabold rounded-full px-3 py-1.5 mb-4"
+                    style={{ background: p.badgeBg, color: p.badgeColor, letterSpacing: "0.08em" }}
+                  >
+                    {p.badge}
+                  </span>
+                  <h3 className="text-xl font-bold text-white mb-1.5">{p.title}</h3>
+                  <p className="text-[13.5px] leading-relaxed mb-[18px]" style={{ color: "#94A3B8" }}>{p.tagline}</p>
+                  <div className="mb-5">
+                    <span className="text-2xl font-extrabold" style={{ color: p.accent }}>{p.price}</span>
+                    <span className="block text-[13.5px] mt-0.5" style={{ color: "#94A3B8" }}>{p.priceNote}</span>
                   </div>
-                  <span className="text-gray-300 text-sm">{item}</span>
+                  <ul className="flex-1 flex flex-col gap-2.5 list-none p-0 m-0 mb-6">
+                    {p.features.map((f, idx) => (
+                      <li key={idx} className="flex gap-2.5 text-[13.5px]" style={{ color: "#d1d5db" }}>
+                        <span style={{ color: p.accent }}>✓</span>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <a
+                    href={p.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-center text-white font-semibold text-[14.5px] px-5 py-3 rounded-xl no-underline transition-all hover:brightness-110"
+                    style={{ background: p.btnBg }}
+                  >
+                    Consultar por WhatsApp
+                  </a>
+                </>
+              );
+              return (
+                <div
+                  key={i}
+                  data-cf-card
+                  role="group"
+                  aria-roledescription="slide"
+                  aria-label={`${p.title}, ${i + 1} de ${plans.length}`}
+                  className="absolute left-1/2 top-1/2"
+                  style={{ width: "min(330px,76vw)", willChange: "transform, opacity" }}
+                >
+                  <div className="ds-cf-inner">
+                    <div
+                      className="ds-glass-face flex flex-col box-border"
+                      style={faceStyle}
+                    >
+                      {cardContent}
+                      <div data-cf-shine className="ds-cf-shine" />
+                      <div data-cf-glare className="absolute inset-0 opacity-0 transition-opacity duration-300" style={{ mixBlendMode: "overlay" }} />
+                    </div>
+                    <GlassFloor variant="full" />
+                    <GlassReflection variant="full" sizeStyle={faceStyle}>
+                      <div className="flex flex-col box-border w-full h-full">{cardContent}</div>
+                    </GlassReflection>
+                    <GlassContactLight variant="full" />
+                  </div>
                 </div>
-              ))}
-            </div>
-
-            {/* === BOTÓN WHATSAPP === */}
-            <button
-              onClick={() =>
-                window.open(
-                  "https://wa.me/5493516325887?text=Hola%2C%20estoy%20interesado%20en%20el%20plan%20Aplicaci%C3%B3n%20a%20Medida.%20%F0%9F%94%A7",
-                  "_blank"
-                )
-              }
-              className="w-full glass-panel px-6 py-3 rounded-lg text-white font-semibold hover:bg-cyan-500/20 transition-all duration-300 neon-border"
-            >
-              Solicitar Cotización
-            </button>
-
-            <div
-              className="mt-4 text-center fade-in"
-              style={{ animationDelay: "4.3s" }}
-            >
-              <span className="text-xs text-green-400">
-                ✅ Ideal para soluciones únicas y personalizadas
-              </span>
-            </div>
+              );
+            })}
           </div>
 
-          {/* 🧩 Plan 2: Aplicación Compartida */}
-          <div
-            className="glass-panel panel-3d p-8 rounded-xl relative overflow-hidden 
-            hover:scale-105 hover:shadow-purple-500/40 transition-all duration-500 
-            slide-in-up"
-            style={{ animationDelay: "4s", animationFillMode: "backwards" }}
-          >
-            <div className="absolute top-0 right-0 bg-gradient-to-l from-purple-500 to-blue-600 text-white px-4 py-2 rounded-bl-lg text-sm font-semibold">
-              🛒 POPULAR
-            </div>
-            <div className="mb-6">
-              <h3 className="text-2xl font-bold text-white mb-2 glow-text">
-                Aplicación Compartida
-              </h3>
-              <p className="text-gray-300 text-sm">
-                Acceso rápido sin inversión inicial
-              </p>
-            </div>
-
-            <div className="mb-6 fade-in" style={{ animationDelay: "1.2s" }}>
-              <div className="text-3xl font-bold text-purple-400 mb-2">
-                Sin costo inicial
-              </div>
-              <div className="text-xl font-semibold text-white mt-2"></div>
-              <div className="text-sm text-gray-400">Suscripción mensual</div>
-            </div>
-
-            <div
-              className="space-y-3 mb-8 slide-in-up"
-              style={{ animationDelay: "3.5s" }}
+          <div className="relative z-10 flex items-center justify-center gap-[18px] mt-[70px]">
+            <button
+              onClick={prev}
+              aria-label="Anterior"
+              className="w-11 h-11 rounded-full border text-white flex items-center justify-center shrink-0 transition-all"
+              style={{ borderColor: "rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.05)" }}
             >
-              {[
-                "Acceso a sistema ya desarrollado",
-                "Client Dashboard (panel del cliente)",
-                "Admin Dashboard (panel administrativo)",
-                "Actualizaciones mensuales incluidas",
-                "Mejoras y nuevas funciones",
-                "Entrada rápida al sistema",
-              ].map((item, i) => (
-                <div key={i} className="flex items-start space-x-3">
-                  <div className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center mt-0.5">
-                    <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-                  </div>
-                  <span className="text-gray-300 text-sm">{item}</span>
-                </div>
+              <ChevronLeft className="w-[18px] h-[18px]" />
+            </button>
+            <div className="flex items-center gap-2.5">
+              {plans.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => goTo(i)}
+                  aria-label={`Ir a tarjeta ${i + 1} de ${plans.length}`}
+                  className="h-2 rounded-full border-none cursor-pointer p-0 transition-all"
+                  style={{
+                    width: activeIndex === i ? 26 : 8,
+                    background: activeIndex === i ? "#3B82F6" : "rgba(255,255,255,0.35)",
+                    boxShadow: activeIndex === i ? "0 0 12px rgba(59,130,246,0.9)" : "none",
+                  }}
+                />
               ))}
             </div>
-
-            {/* === BOTÓN WHATSAPP === */}
             <button
-              onClick={() =>
-                window.open(
-                  "https://wa.me/5493516325887?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20el%20plan%20Aplicaci%C3%B3n%20Compartida.%20%F0%9F%9B%92",
-                  "_blank"
-                )
-              }
-              className="w-full glass-panel px-6 py-3 rounded-lg text-white font-semibold hover:bg-purple-500/20 transition-all duration-300 neon-border"
+              onClick={next}
+              aria-label="Siguiente"
+              className="w-11 h-11 rounded-full border text-white flex items-center justify-center shrink-0 transition-all"
+              style={{ borderColor: "rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.05)" }}
             >
-              Comenzar Suscripción
+              <ChevronRight className="w-[18px] h-[18px]" />
             </button>
-
-            <div
-              className="mt-4 text-center fade-in"
-              style={{ animationDelay: "3.8s" }}
-            >
-              <span className="text-xs text-green-400">
-                ✅ Perfecto para entrada rápida sin desarrollo exclusivo
-              </span>
-            </div>
-          </div>
-
-          {/* 🧩 Plan 3: Landing Page */}
-          <div
-            className="glass-panel panel-3d p-8 rounded-xl relative overflow-hidden 
-            hover:scale-105 hover:shadow-green-500/40 transition-all duration-500 
-            slide-in-right"
-            style={{ animationDelay: "3.5s", animationFillMode: "backwards" }}
-          >
-            <div className="absolute top-0 right-0 bg-gradient-to-l from-green-500 to-blue-600 text-white px-4 py-2 rounded-bl-lg text-sm font-semibold">
-              🌐 BÁSICO
-            </div>
-            <div className="mb-6">
-              <h3 className="text-2xl font-bold text-white mb-2 glow-text">
-                Landing Page
-              </h3>
-              <p className="text-gray-300 text-sm">Presencia web profesional</p>
-            </div>
-
-            <div className="mb-6 fade-in" style={{ animationDelay: "3.8s" }}>
-              <div className="text-3xl font-bold text-green-400 mb-2"></div>
-              <div className="text-sm text-gray-400">Costo inicial</div>
-              <div className="text-xl font-semibold text-white mt-2"></div>
-              <div className="text-sm text-gray-400">
-                Mantenimiento semestral
-              </div>
-            </div>
-
-            <div
-              className="space-y-3 mb-8 slide-in-up"
-              style={{ animationDelay: "4s" }}
-            >
-              {[
-                "Página web informativa y profesional",
-                "Formulario de contacto",
-                "Encuestas vía WhatsApp",
-                "Dominio incluido por 6 meses",
-                "Actualizaciones cada 6 meses",
-                "Generación de contactos",
-              ].map((item, i) => (
-                <div key={i} className="flex items-start space-x-3">
-                  <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center mt-0.5">
-                    <div className="w-2 h-2 rounded-full bg-green-400"></div>
-                  </div>
-                  <span className="text-gray-300 text-sm">{item}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* === BOTÓN WHATSAPP === */}
-            <button
-              onClick={() =>
-                window.open(
-                  "https://wa.me/5493516325887?text=Hola%2C%20me%20gustar%C3%ADa%20crear%20una%20Landing%20Page.%20%F0%9F%8C%90",
-                  "_blank"
-                )
-              }
-              className="w-full glass-panel px-6 py-3 rounded-lg text-white font-semibold hover:bg-green-500/20 transition-all duration-300 neon-border"
-            >
-              Crear Landing Page
-            </button>
-
-            <div
-              className="mt-4 text-center fade-in"
-              style={{ animationDelay: "2.3s" }}
-            >
-              <span className="text-xs text-green-400">
-                ✅ Ideal para atraer clientes y generar contactos
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* === TABLA RESUMEN COMPARATIVO === */}
-        <div className="mt-16 slide-in-up hidden md:block">
-          <h3 className="text-2xl font-bold text-white text-center mb-8 glow-text">
-            Resumen Comparativo
-          </h3>
-          <div className="glass-panel rounded-xl overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-white">
-                <thead className="bg-white/5">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">
-                      Servicio
-                    </th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-300">
-                      Costo Inicial
-                    </th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-300">
-                      Mensualidad
-                    </th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-300">
-                      Mantenimiento
-                    </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">
-                      Incluye
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/10">
-                  <tr className="hover:bg-white/5 transition-colors">
-                    <td className="px-6 py-4 font-medium text-cyan-400">
-                      Aplicación a Medida
-                    </td>
-                    <td className="px-6 py-4 text-center"></td>
-                    <td className="px-6 py-4 text-center"></td>
-                    <td className="px-6 py-4 text-center">–</td>
-                    <td className="px-6 py-4 text-sm text-gray-300">
-                      App exclusiva + Dashboards + Landing + Dominio 1 año
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-white/5 transition-colors">
-                    <td className="px-6 py-4 font-medium text-purple-400">
-                      Aplicación Compartida
-                    </td>
-                    <td className="px-6 py-4 text-center">–</td>
-                    <td className="px-6 py-4 text-center"></td>
-                    <td className="px-6 py-4 text-center">–</td>
-                    <td className="px-6 py-4 text-sm text-gray-300">
-                      Sistema estándar + Dashboards + Actualizaciones
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-white/5 transition-colors">
-                    <td className="px-6 py-4 font-medium text-green-400">
-                      Landing Page
-                    </td>
-                    <td className="px-6 py-4 text-center"></td>
-                    <td className="px-6 py-4 text-center">–</td>
-                    <td className="px-6 py-4 text-center"></td>
-                    <td className="px-6 py-4 text-sm text-gray-300">
-                      Página web + Formularios + WhatsApp + Dominio 6 meses
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
           </div>
         </div>
       </div>

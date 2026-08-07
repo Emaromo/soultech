@@ -1,0 +1,902 @@
+/* Animaciones y utilidades nuevas para el rediseño "Soul Tech Landing.dc.html". */
+
+/* Inputs de vidrio (ContactSection): foco reemplaza el outline nativo por un
+   borde cian + glow, nunca lo saca sin reemplazo (a11y). */
+.ds-input-label {
+  display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .1em;
+  color: #94A3B8; margin-bottom: 6px; font-weight: 600;
+}
+.ds-input {
+  width: 100%; box-sizing: border-box;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 13px 16px;
+  color: #fff;
+  font-size: 14.5px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.ds-input::placeholder { color: #64748B; }
+.ds-input:focus {
+  border-color: #38BDF8;
+  box-shadow: 0 0 0 3px rgba(56,189,248,0.15);
+}
+.ds-input.ds-input--error { border-color: rgba(248,113,113,0.7); }
+.ds-input.ds-input--error:focus { box-shadow: 0 0 0 3px rgba(248,113,113,0.18); }
+.ds-input-error { color: #F87171; font-size: 12.5px; margin: 4px 0 0; }
+
+/* Botón de WhatsApp compartido (form de contacto + panel de contacto). */
+.ds-wa-btn {
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; box-sizing: border-box; padding: 13px 16px;
+  border-radius: 12px; border: none; cursor: pointer;
+  background: linear-gradient(135deg, #06b6d4, #2563eb);
+  color: #fff; font-weight: 600; font-size: 15px; text-decoration: none;
+  box-shadow: 0 0 18px rgba(0,255,255,0.35);
+  transition: transform .25s ease, filter .25s ease, box-shadow .25s ease;
+}
+.ds-wa-btn:hover, .ds-wa-btn:focus-visible {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow: 0 0 32px rgba(0,255,255,0.65);
+}
+.ds-wa-btn:focus-visible { outline: 2px solid #38BDF8; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .ds-wa-btn:hover, .ds-wa-btn:focus-visible { transform: none; }
+}
+/* Modificador — SOLO para el botón fijo del asistente (ver
+   AssistantSection.jsx), cuando el último nodo respondido tenía cta:true.
+   Aditivo sobre .ds-wa-btn, no toca su regla base (compartida con el
+   formulario y panel de Contacto). */
+.ds-wa-btn--cta {
+  box-shadow: 0 0 26px rgba(0,255,255,0.75), 0 0 46px rgba(37,99,235,0.45);
+  transform: scale(1.03);
+}
+.ds-wa-btn--cta:hover, .ds-wa-btn--cta:focus-visible {
+  box-shadow: 0 0 40px rgba(0,255,255,0.9);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ds-wa-btn--cta { transform: none; }
+}
+
+/* Links del footer: transición a cian + foco visible para teclado, más
+   subrayado animado (scaleX, sin partículas — "sería ruidoso en elementos
+   chicos"). */
+.ds-footer-link,
+.ds-nav-link {
+  position: relative;
+  display: inline-block;
+  color: #CBD5E1;
+  text-decoration: none;
+  transition: color .2s ease;
+}
+.ds-footer-link::after,
+.ds-nav-link::after {
+  content: '';
+  position: absolute; left: 0; right: 0; bottom: -3px; height: 1px;
+  background: #38BDF8;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .2s cubic-bezier(0.22,1,0.36,1);
+}
+.ds-footer-link:hover, .ds-footer-link:focus-visible,
+.ds-nav-link:hover, .ds-nav-link:focus-visible { color: #38BDF8; }
+.ds-footer-link:hover::after, .ds-footer-link:focus-visible::after,
+.ds-nav-link:hover::after, .ds-nav-link:focus-visible::after { transform: scaleX(1); }
+.ds-footer-link:focus-visible, .ds-nav-link:focus-visible {
+  outline: 2px solid #38BDF8; outline-offset: 3px; border-radius: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ds-footer-link::after, .ds-nav-link::after { transition-duration: .01ms; }
+}
+
+/* Iconos sociales del footer: mismo lenguaje que .ds-social pero cuadrado
+   rounded-xl (pide la spec) en vez de círculo, + rotación sutil del ícono. */
+.ds-social-btn {
+  width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #94A3B8;
+  cursor: pointer;
+  transition: color .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+.ds-social-btn svg { transition: transform .2s ease; }
+.ds-social-btn:hover, .ds-social-btn:focus-visible {
+  color: #38BDF8;
+  border-color: #38BDF8;
+  box-shadow: 0 0 16px rgba(56,189,248,0.45);
+  transform: translateY(-2px);
+}
+.ds-social-btn:hover svg, .ds-social-btn:focus-visible svg { transform: rotate(5deg); }
+.ds-social-btn:focus-visible { outline: 2px solid #38BDF8; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .ds-social-btn:hover, .ds-social-btn:focus-visible { transform: none; }
+  .ds-social-btn:hover svg, .ds-social-btn:focus-visible svg { transform: none; }
+}
+
+/* Botones circulares de ícono (enviar del asistente, etc.): rotación sutil
+   del ícono en hover/foco, mismo lenguaje que .ds-social-btn. */
+.ds-icon-btn-rotate svg { transition: transform .2s ease; }
+.ds-icon-btn-rotate:hover svg, .ds-icon-btn-rotate:focus-visible svg { transform: rotate(5deg); }
+.ds-icon-btn-rotate:focus-visible { outline: 2px solid #38BDF8; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .ds-icon-btn-rotate:hover svg, .ds-icon-btn-rotate:focus-visible svg { transform: none; }
+}
+
+/* CTA del header ("Cotizar Proyecto"): mismo lenguaje de hover que .ds-wa-btn
+   (elevación + glow), position:relative+overflow:hidden para el shine sweep. */
+.ds-header-cta {
+  position: relative; overflow: hidden; display: inline-block;
+  transition: transform .25s ease, filter .25s ease, box-shadow .25s ease;
+}
+.ds-header-cta:hover, .ds-header-cta:focus-visible {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow: 0 0 30px rgba(0,255,255,0.65) !important;
+}
+.ds-header-cta:focus-visible { outline: 2px solid #38BDF8; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .ds-header-cta:hover, .ds-header-cta:focus-visible { transform: none; }
+}
+
+/* Shine sweep de un solo paso para botones (WhatsApp/CTAs), disparado por
+   useParticleHover en mouseenter — no confundir con .ds-cf-shine (loop
+   infinito de las tarjetas del carrusel). Requiere que el botón tenga
+   position:relative + overflow:hidden (ver .ds-wa-btn y .ds-liquid-glass). */
+.ds-btn-shine {
+  position: absolute; top: 0; bottom: 0; left: -35%; width: 30%;
+  background: linear-gradient(105deg, transparent 10%, rgba(255,255,255,0.6) 50%, transparent 90%);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(0) skewX(-18deg);
+}
+@keyframes dsBtnShineOnce {
+  0% { transform: translateX(0) skewX(-18deg); opacity: 0; }
+  15% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateX(420%) skewX(-18deg); opacity: 0; }
+}
+.ds-btn-shine.is-playing { animation: dsBtnShineOnce 500ms ease-out; }
+
+/* Filas de contacto (ContactSection): las que tienen href se ven clicables
+   (glow sutil + subrayado del valor en hover/foco); "Horario" es un <div>
+   sin href y no reacciona. */
+.ds-contact-row { border-radius: 12px; padding: 6px; margin: -6px; transition: background .2s ease; }
+a.ds-contact-row:hover, a.ds-contact-row:focus-visible {
+  background: rgba(56,189,248,0.07);
+}
+a.ds-contact-row:hover .ds-contact-value,
+a.ds-contact-row:focus-visible .ds-contact-value {
+  text-decoration: underline;
+}
+a.ds-contact-row:focus-visible { outline: 2px solid #38BDF8; outline-offset: 2px; }
+
+/* Punto "En línea" del asistente: pulso de glow, no de tamaño (así no
+   empuja layout). */
+@keyframes dsOnlinePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.65); }
+  50% { box-shadow: 0 0 0 4px rgba(74,222,128,0); }
+}
+.ds-online-dot { animation: dsOnlinePulse 2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .ds-online-dot { animation: none; }
+}
+
+/* Chips de respuesta rápida del asistente: "ghost" cian, se rellenan en
+   hover/foco. Botones reales (no <a>), navegables por teclado. */
+.ds-chip-btn {
+  font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 999px;
+  background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.3);
+  color: #38BDF8; cursor: pointer;
+  transition: background .2s ease, border-color .2s ease, color .2s ease, transform .15s ease;
+}
+.ds-chip-btn:hover, .ds-chip-btn:focus-visible {
+  background: rgba(56,189,248,0.22);
+  border-color: #38BDF8;
+  transform: translateY(-1px);
+}
+.ds-chip-btn:focus-visible { outline: 2px solid #38BDF8; outline-offset: 2px; }
+.ds-chip-btn:active { transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .ds-chip-btn:hover, .ds-chip-btn:focus-visible { transform: none; }
+}
+
+/* Tarjetas de "Proyectos reales": imagen arriba con esquinas redondeadas
+   heredadas del overflow:hidden de .ds-glass-face (el wrap no tiene su
+   propio border-radius por eso, para no desalinear el recorte con el borde
+   real de la tarjeta si algún navegador redondea distinto). */
+.ds-project-img-wrap { position: relative; aspect-ratio: 16 / 10; overflow: hidden; }
+/* Galería rotativa dentro de la tarjeta (ver ProjectGallery en
+   ClientsSection.jsx): todas las imágenes en position:absolute superpuestas
+   — el crossfade solo anima opacity, nunca hay más de un layout posible, así
+   que no puede haber salto de altura. */
+.ds-project-gallery { position: absolute; inset: 0; }
+.ds-project-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform .4s ease, opacity .6s ease;
+}
+.ds-project-img-wrap::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 55%, rgba(6,10,20,0.85) 100%);
+  pointer-events: none;
+}
+/* Dots de la galería: por encima del degradé de arriba (mismo z-index
+   "bucket" que un ::after position:absolute sin z-index — sin esto, el
+   degradé pinta encima y los tapa). Viven ya sobre la zona oscurecida del
+   degradé, así que no compiten en contraste con la captura de abajo. */
+.ds-project-gallery-dots {
+  position: absolute; left: 0; right: 0; bottom: 10px; z-index: 2;
+  display: flex; justify-content: center; gap: 6px;
+}
+.ds-project-gallery-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(255,255,255,0.45);
+  cursor: pointer;
+  transition: background .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+.ds-project-gallery-dot.is-active {
+  background: #fff;
+  box-shadow: 0 0 6px rgba(255,255,255,0.85);
+  transform: scale(1.2);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ds-project-img { transition: opacity 1ms linear; }
+}
+a.ds-project-card { text-decoration: none; display: block; height: 100%; }
+/* Escapado a esta sola clase (no toca la regla base de .ds-cf-inner, que
+   sigue sin height explícito para el resto de sus usos — carruseles y
+   tarjetas estáticas de Proceso/Contacto — donde SÍ colapsaría a 0 sin un
+   ancestro con altura definida, ver comentario junto a .ds-cf-inner más
+   abajo). Acá el <a> ya llega con height:100% desde la celda de la grilla
+   (align-items:stretch), así que bajarlo es seguro y es lo que permite que
+   el vidrio/reflejo/piso se estiren parejo entre las 3 tarjetas. */
+.ds-project-card .ds-cf-inner { height: 100%; }
+a.ds-project-card:hover .ds-project-img,
+a.ds-project-card:focus-visible .ds-project-img { transform: scale(1.06); }
+a.ds-project-card:hover .ds-static-glass,
+a.ds-project-card:focus-visible .ds-static-glass {
+  --edge: 0.7;
+  transform: translateY(-8px);
+}
+a.ds-project-card:focus-visible { outline: 2px solid #38BDF8; outline-offset: 4px; border-radius: 22px; }
+@media (prefers-reduced-motion: reduce) {
+  a.ds-project-card:hover .ds-project-img, a.ds-project-card:focus-visible .ds-project-img { transform: none; }
+  a.ds-project-card:hover .ds-static-glass, a.ds-project-card:focus-visible .ds-static-glass { transform: none; }
+}
+
+/* CAPA 2 del fondo (halo detrás del carrusel): le da "algo que refractar" al
+   vidrio de las tarjetas para que el borde blanco recorte contra luz en vez
+   de contra vacío. Usada en ServicesSection y PricingSection, detrás de sus
+   respectivos carruseles. Puramente decorativa (ver aria-hidden en el JSX). */
+.ds-carousel-halo {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 45% 40% at 50% 45%, rgba(37,99,235,0.28) 0%, rgba(37,99,235,0.08) 40%, transparent 70%);
+  filter: blur(60px);
+}
+@media (max-width: 640px) {
+  .ds-carousel-halo { filter: blur(40px); }
+}
+
+@keyframes dsBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.ds-blink { animation: dsBlink 1s ease-in-out infinite; }
+
+@keyframes dsFloatUp {
+  0% { transform: translateY(0); opacity: 0; }
+  10% { opacity: 0.9; }
+  90% { opacity: 0.5; }
+  100% { transform: translateY(-105vh); opacity: 0; }
+}
+
+@keyframes dsMarquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ds-marquee { animation: dsMarquee 20s linear infinite; }
+
+@keyframes dsShiny {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.ds-shiny-text {
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: dsShiny 6s linear infinite;
+}
+
+@keyframes dsShineSweep {
+  0% { transform: translateX(-160%) skewX(-18deg); }
+  30% { transform: translateX(340%) skewX(-18deg); }
+  100% { transform: translateX(340%) skewX(-18deg); }
+}
+.ds-cf-shine {
+  position: absolute;
+  top: -25%;
+  bottom: -25%;
+  left: -10%;
+  width: 45%;
+  background: linear-gradient(105deg, transparent 8%, rgba(255,255,255,0.5) 50%, transparent 92%);
+  opacity: 0;
+  transition: opacity .5s ease;
+  animation: dsShineSweep 4.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes dsLogoFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); filter: drop-shadow(0 0 8px rgba(0,255,255,0.55)); }
+  50% { transform: translateY(-3px) rotate(-3deg); filter: drop-shadow(0 0 16px rgba(0,255,255,0.95)); }
+}
+.ds-logo-float { animation: dsLogoFloat 3.5s ease-in-out infinite; }
+
+@keyframes dsLogoSpinGlow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.ds-logo-spin-ring { animation: dsLogoSpinGlow 4s linear infinite; }
+
+@keyframes dsCheckPop {
+  0% { transform: scale(0); opacity: 0; }
+  70% { transform: scale(1.25); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.ds-check-pop { animation: dsCheckPop .4s cubic-bezier(.2,1.2,.4,1) both; }
+
+/* --- Divisoria del Hero: línea base + haz de luz que la recorre (ver
+   HeroSection.jsx) --- reemplaza al viejo .ds-energy-bar (gradiente
+   desplazándose parejo); esto es un núcleo compacto que viaja una vez por
+   loop, más legible como "acento" que como borde. Solo transform, nunca
+   filter (perf: no repintar/reflow). */
+.hero-divider {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(56, 189, 248, 0.15);
+  overflow: hidden;
+}
+.hero-divider__beam {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -20%;
+  width: 18%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #2563eb,
+    #38bdf8,
+    #ffffff,
+    #38bdf8,
+    #2563eb,
+    transparent
+  );
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+  animation: heroBeamTravel 3.8s ease-in-out infinite;
+  will-change: transform;
+}
+@keyframes heroBeamTravel {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(700%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-divider__beam { animation: none; display: none; }
+}
+
+/* Capas de fondo del Hero (color base + video/ruido + blob) que se
+   desvanecen hacia abajo en vez de cortar en seco contra la sección
+   siguiente — ver punto 2 de la spec. mask-image, no opacity: así el
+   contenido (texto/CTA/marquee), que NO lleva esta clase, queda intacto. */
+.hero-bg-fade {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 160px), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 160px), transparent 100%);
+}
+@media (max-width: 640px) {
+  .hero-bg-fade {
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 110px), transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 110px), transparent 100%);
+  }
+}
+
+/* --- Etiqueta + marquee de stack tecnológico (ver MarqueeLogos.jsx) ---
+   Apilados en columna (label arriba, marquee abajo) a propósito: el layout
+   anterior los ponía en la misma fila con flex-wrap, y a ciertos anchos el
+   label terminaba superpuesto contra los logos en vez de encima con su
+   propio espacio. */
+.hero-stack-label {
+  margin: 0 0 16px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  color: rgba(242, 241, 238, 0.62);
+}
+.hero-marquee-mask {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.hero-marquee-track {
+  display: flex;
+  align-items: center;
+  gap: 56px;
+  width: max-content;
+  animation: dsMarquee 26s linear infinite;
+}
+.hero-stack-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hero-stack-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: #ffffff;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
+}
+.hero-stack-name {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.35), 0 0 40px rgba(255, 255, 255, 0.12);
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  .hero-marquee-track { gap: 38px; animation-duration: 17s; }
+  .hero-stack-icon { width: 18px; height: 18px; }
+  .hero-stack-name { font-size: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-marquee-track { animation: none; }
+}
+
+/* Efecto "vidrio líquido" con borde en degradé (usado en el CTA del hero y los chips del marquee) */
+.ds-liquid-glass {
+  position: relative;
+  background: rgba(255, 255, 255, 0.01);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  transition: transform .3s cubic-bezier(0.22,1,0.36,1);
+}
+.ds-liquid-glass:hover, .ds-liquid-glass:focus-visible { transform: translateY(-2px); }
+.ds-liquid-glass:focus-visible { outline: 2px solid #38BDF8; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .ds-liquid-glass:hover, .ds-liquid-glass:focus-visible { transform: none; }
+}
+.ds-liquid-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(180deg,
+    rgba(255,255,255,0.45) 0%,
+    rgba(255,255,255,0.15) 20%,
+    rgba(255,255,255,0) 40%,
+    rgba(255,255,255,0) 60%,
+    rgba(255,255,255,0.15) 80%,
+    rgba(255,255,255,0.45) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* --- Modelo "tarjeta de vidrio" (glassmorphism, borde blanco brillante,
+   reflejo y materialización por partículas) usado en los carruseles 3D
+   (Servicios, Precios, Rubros) y en las grillas/paneles estáticos
+   (Proyectos, Proceso, Contacto, Asistente) --- */
+
+/* Variante ESTÁTICA de .ds-glass-face (sin motor de carrusel seteando
+   --edge por frame): Proceso, Contacto. --edge fijo y bajo en reposo —a
+   propósito, para que ninguna tarjeta "domine" como la activa de un
+   carrusel— y sube en hover/focus, con una leve elevación. */
+.ds-static-glass { transition: transform .3s cubic-bezier(.2,.8,.2,1); }
+.ds-static-glass:hover,
+.ds-static-glass:focus-within {
+  --edge: 0.75;
+  transform: translateY(-6px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ds-static-glass:hover, .ds-static-glass:focus-within { transform: none; }
+}
+/* Timeline de Proceso: hover en la tarjeta O en el círculo numerado
+   intensifica a ambos a la vez (mismo wrapper .proc-step). */
+.proc-step:hover .proc-circle,
+.proc-step:focus-within .proc-circle {
+  box-shadow: 0 0 26px rgba(255,255,255,0.85), 0 0 50px rgba(255,255,255,0.35);
+  border-color: #FFFFFF;
+}
+.proc-step:hover .ds-static-glass,
+.proc-step:focus-within .ds-static-glass {
+  --edge: 0.75;
+  transform: translateY(-6px);
+}
+
+.ds-glass-face {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1.5px solid rgba(255,255,255, calc(0.9 * var(--edge, 1)));
+  box-shadow:
+    0 0 20px rgba(255,255,255, calc(0.35 * var(--edge, 1))),
+    0 0 60px rgba(255,255,255, calc(0.12 * var(--edge, 1))),
+    inset 0 0 20px rgba(255,255,255, calc(0.08 * var(--edge, 1))),
+    /* Highlight superior: canto iluminado del vidrio. */
+    inset 0 1px 0 rgba(255,255,255,0.25),
+    0 26px 60px rgba(0,0,0,0.55);
+  transition: border-color .15s linear, box-shadow .15s linear;
+}
+.ds-glass-face::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.15) 45%, rgba(255,255,255,0.5) 100%);
+  opacity: var(--edge, 1);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+/* Grid de una sola celda: la cara, el reflejo y la luz de contacto se
+   apilan exactamente unos sobre otros (mismo grid-area), así heredan por
+   "stretch" la altura real de la cara sin depender de `height:100%` (que
+   colapsaría a 0 porque `.ds-cf-inner` no tiene una altura explícita). */
+.ds-cf-inner { display: grid; transform-style: preserve-3d; }
+.ds-cf-inner > .ds-glass-face,
+.ds-cf-inner > .ds-glass-floor,
+.ds-cf-inner > .ds-glass-reflection,
+.ds-cf-inner > .ds-contact-light { grid-area: 1 / 1 / 2 / 2; }
+
+/* Reflejo en la base: duplicado completo de `.ds-glass-face` (mismo borde,
+   glow e --edge heredado por herencia de custom properties), espejado y
+   "acostado" sobre el piso de la grilla.
+   Matemática del transform (origen arriba-centro, ver nota abajo):
+   - Queremos que el punto más cercano al borde inferior real de la tarjeta
+     (contenido en el extremo inferior del clon) quede pegado al hinge
+     (justo debajo de la tarjeta, con el gap), y que el punto más lejano
+     (extremo superior del clon) quede más abajo y comprimido (--refl-comp).
+   - Con transform-origin en el borde superior del clon, la traducción
+     necesaria es `(1 + comp) * 100% + gap` (100% = alto del clon, igual al
+     de la cara por el grid-stretch); ver docs internas para la derivación.
+   - rotateX "acuesta" el reflejo sobre el plano del piso en vez de dejarlo
+     plano contra la pantalla (necesita `perspective` en un ancestro, ya
+     presente en el contenedor del carrusel). */
+.ds-glass-reflection {
+  pointer-events: none;
+  overflow: hidden;
+  transform-origin: top center;
+  transform:
+    translateY(calc((100% * (1 + var(--refl-comp, 0.6))) + var(--refl-gap, 3px)))
+    scaleY(calc(-1 * var(--refl-comp, 0.6)))
+    rotateX(var(--refl-tilt, 4deg));
+  /* Intensidad: 'full' = 0.35 en la tarjeta central (edge=1), cayendo a
+     ~0.15 en las laterales del carrusel por el mismo factor de --edge;
+     'grid' = calibrado para ~0.25 al --edge de reposo de tarjetas/paneles
+     estáticos. Ver GlassReflection (GlassCard.jsx) para --refl-op. */
+  opacity: calc(var(--refl-op, 0.22) * (0.22 + 0.78 * var(--edge, 1)));
+  /* blur 2.5px de base: nítido suficiente para leerse como espejo, difuso
+     suficiente para no leerse el texto. El término (1-edge) sigue sumando
+     blur extra en las tarjetas laterales del carrusel a propósito. */
+  filter: blur(calc(2.5px + (1 - var(--edge, 1)) * 2.5px)) brightness(0.7) saturate(1.2);
+  transition: opacity .15s linear, filter .15s linear;
+  /* Máscara en espacio LOCAL (antes del scaleY(-1)): local-100% = borde
+     inferior real de la tarjeta = lo más cercano al "piso" en pantalla, por
+     eso es el extremo más opaco; local-0% = lo más lejos, transparente.
+     Alcance más largo que antes (empieza a aparecer desde 20% en vez de
+     40%) y tope más alto (0.65 en vez de 0.5) para que se lea claramente
+     como piso pulido sin llegar a competir con la sección siguiente. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 20%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.65) 100%);
+  mask-image: linear-gradient(to bottom, transparent 20%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.65) 100%);
+}
+/* Tinte azulado ambiental sobre el reflejo (muy sutil). */
+.ds-glass-reflection::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #2563EB;
+  opacity: 0.14;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+/* Contenido del reflejo (ícono/título/texto/chips/bullets, todo lo que NO
+   es el marco de .ds-glass-face): mucho más atenuado que el contorno, para
+   que lo único legible sea el borde blanco y la silueta de la tarjeta, no
+   el texto invertido. */
+.ds-reflection-content { opacity: 0.3; }
+/* Brillo de contacto: elipse difusa donde la tarjeta "toca" el piso. */
+.ds-contact-light {
+  align-self: end;
+  justify-self: center;
+  width: 90%;
+  height: 22px;
+  transform: translateY(50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.22), rgba(37,99,235,0.16) 55%, transparent 75%);
+  filter: blur(12px);
+  opacity: var(--edge, 1);
+  pointer-events: none;
+}
+/* Oscurecimiento sutil de la "superficie" justo debajo de la tarjeta: le da
+   al reflejo algo sobre lo que apoyarse en vez de quedar flotando en el
+   vacío. Se pinta antes que el reflejo (mismo grid-area, pero declarado
+   primero en el DOM) para quedar detrás de él. */
+.ds-glass-floor {
+  align-self: end;
+  justify-self: center;
+  width: 115%;
+  height: 45%;
+  transform: translateY(55%);
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.55), transparent 72%);
+  opacity: var(--edge, 1);
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  /* Móvil: blur base más bajo (1.5px, menos costo de composición) y
+     opacidad reducida (mismo factor de --edge, 25% menos intensidad). */
+  .ds-glass-reflection { filter: blur(calc(1.5px + (1 - var(--edge, 1)) * 2px)) brightness(0.7) saturate(1.2); }
+  .ds-glass-reflection { opacity: calc(var(--refl-op, 0.22) * 0.75 * (0.22 + 0.78 * var(--edge, 1))); }
+}
+
+.mz-particles { position: absolute; inset: -6%; pointer-events: none; }
+.mz-particle {
+  position: absolute; left: var(--cx); top: var(--cy); width: var(--sz); height: var(--sz);
+  border-radius: 50%; background: #fff; opacity: 0;
+  box-shadow: 0 0 6px rgba(255,255,255,0.9), 0 0 14px rgba(255,255,255,0.5);
+}
+.is-materializing .mz-particle {
+  animation: mzParticleIn 900ms cubic-bezier(.16,1,.3,1) var(--pdelay,0ms) both;
+}
+@keyframes mzParticleIn {
+  0% { transform: translate(var(--dx), var(--dy)) scale(1); opacity: .95; }
+  65% { opacity: .55; }
+  100% { transform: translate(0,0) scale(.15); opacity: 0; }
+}
+.mz-fallback-in { opacity: 0; transform: scale(.92); animation: mzFadeIn 600ms ease-out forwards; }
+@keyframes mzFadeIn { to { opacity: 1; transform: scale(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .is-materializing .mz-particle { animation: none !important; opacity: 0 !important; }
+  .mz-fallback-in { animation: mzFadeIn 1ms forwards; }
+}
+
+/* --- SectionBackdrop: capa de fondo compartida por toda la landing (ver
+   SectionBackdrop.jsx) --- "viñeta invertida": centro despejado, bordes con
+   más densidad, para que el contenido se lea "adelante" y los laterales
+   "atrás". Va DETRÁS de halos/partículas/contenido existentes (montada como
+   primer hijo del <section>, sin z-index — el orden del DOM ya la deja
+   atrás). Paleta fija: azul #2563EB para la luz, #080F23→#050A1A para la
+   densidad lateral (nunca negro puro: aplanaría la escena) — cian reservado
+   para el hilo del horizonte (ver .sb-horizon) y prohibido en el resto, para
+   no competir con los acentos de la UI (iconos/chips/links). */
+.sb-backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+/* Misma fórmula en las tres variantes a propósito: así el color en el borde
+   inferior de una sección coincide con el del borde superior de la
+   siguiente y la unión queda invisible (no reimplementar por sección). */
+.sb-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 90% 80% at 50% 50%,
+    transparent 30%,
+    rgba(8, 15, 35, calc(0.55 * var(--sb-vignette, 1))) 65%,
+    rgba(5, 10, 26, calc(0.85 * var(--sb-vignette, 1))) 100%
+  );
+}
+.sb-well {
+  position: absolute;
+  inset: 0;
+  opacity: var(--sb-intensity, 1);
+}
+/* variant="carousel" (Servicios, Precios/Rubros): pozo desplazado hacia
+   abajo, a la altura de la base de las tarjetas — la luz "nace" del piso y
+   los reflejos se apoyan sobre ella en vez de flotar sobre vacío. */
+.sb-backdrop--carousel .sb-well {
+  background: radial-gradient(ellipse 50% 45% at 50% 62%, rgba(37, 99, 235, 0.2) 0%, rgba(37, 99, 235, 0.07) 45%, transparent 72%);
+  filter: blur(70px);
+}
+/* variant="grid" (Proyectos, Proceso): pozo más ancho y plano — hay varios
+   elementos repartidos, concentrar la luz al centro apagaría los extremos. */
+.sb-backdrop--grid .sb-well {
+  background: radial-gradient(ellipse 75% 40% at 50% 55%, rgba(37, 99, 235, 0.13) 0%, rgba(37, 99, 235, 0.05) 50%, transparent 78%);
+  filter: blur(80px);
+}
+/* variant="panel" (Contacto, Asistente): luz suave y pareja — son bloques de
+   lectura, la legibilidad manda por sobre el efecto. */
+.sb-backdrop--panel .sb-well {
+  background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(37, 99, 235, 0.1) 0%, transparent 75%);
+  filter: blur(90px);
+}
+/* Hilo de cian en la línea del horizonte (única excepción a "cian prohibido
+   en el fondo"): refuerza el contacto de las tarjetas con "el piso" en las
+   secciones con reflejo (todas). Alineado con el centro del pozo de cada
+   variante. Opacidad tope 0.04 — se lee como un filo de luz, no como color. */
+.sb-horizon {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.04), transparent);
+  filter: blur(3px);
+}
+.sb-backdrop--carousel .sb-horizon { top: 62%; }
+.sb-backdrop--grid .sb-horizon { top: 55%; }
+.sb-backdrop--panel .sb-horizon { top: 50%; }
+/* Grano/ruido a opacidad fija muy baja: rompe el banding de los degradados
+   oscuros (se nota mucho en azules profundos en pantallas grandes). SVG
+   inline mínimo (feTurbulence), no una imagen — sigue siendo "solo CSS" en
+   espíritu (ni assets ni requests de red). */
+.sb-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media (max-width: 640px) {
+  /* La tarjeta activa ocupa casi todo el ancho: pozo más chico (si no,
+     spillea parejo a los costados en vez de leerse concentrado) y blur más
+     bajo (costo de composición en gama baja). */
+  .sb-backdrop--carousel .sb-well {
+    background: radial-gradient(ellipse 68% 38% at 50% 62%, rgba(37, 99, 235, 0.2) 0%, rgba(37, 99, 235, 0.07) 45%, transparent 72%);
+    filter: blur(50px);
+  }
+  .sb-backdrop--grid .sb-well { filter: blur(60px); }
+  .sb-backdrop--panel .sb-well { filter: blur(60px); }
+}
+
+/* --- Logo de Soul Tech (navbar, ver SoulTechLogo.jsx) --- Escudo = PNG
+   real, estático (nunca se le anima filter/transform). La llama se recorta
+   del mismo PNG con una <mask> SVG (así el glow sigue el contorno real de
+   la llama, sin recrear su degradado a mano) y son las ÚNICAS capas que
+   laten/escalan. */
+.soultech-logo {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+.soultech-logo-link:hover .soultech-logo { transform: scale(1.05); }
+@media (prefers-reduced-motion: reduce) {
+  .soultech-logo-link:hover .soultech-logo { transform: none; }
+}
+
+/* Glow blanco de la llama, en 3 capas (core/mid/outer) que respiran entre
+   un estado tenue y uno encendido — cada una con su propio radio+opacidad
+   (ver FLAME_GLOW_LAYERS en SoulTechLogo.jsx) y su propio período NO
+   múltiplo de los demás (1.7s/2.3s/3.1s), para que el conjunto nunca
+   repita el mismo patrón y no se lea como un LED titilando. */
+@keyframes dsFlameGlowCore {
+  0%   { filter: drop-shadow(0 0 4px rgba(255,255,255,0.5)); }
+  30%  { filter: drop-shadow(0 0 4.6px rgba(255,255,255,0.68)); }
+  55%  { filter: drop-shadow(0 0 6px rgba(255,255,255,1)); }
+  78%  { filter: drop-shadow(0 0 4.8px rgba(255,255,255,0.74)); }
+  100% { filter: drop-shadow(0 0 4px rgba(255,255,255,0.5)); }
+}
+@keyframes dsFlameGlowMid {
+  0%   { filter: drop-shadow(0 0 8px rgba(255,255,255,0.3)); }
+  25%  { filter: drop-shadow(0 0 9.8px rgba(255,255,255,0.44)); }
+  60%  { filter: drop-shadow(0 0 14px rgba(255,255,255,0.7)); }
+  85%  { filter: drop-shadow(0 0 10.5px rgba(255,255,255,0.42)); }
+  100% { filter: drop-shadow(0 0 8px rgba(255,255,255,0.3)); }
+}
+@keyframes dsFlameGlowOuter {
+  0%   { filter: drop-shadow(0 0 16px rgba(255,255,255,0.15)); }
+  35%  { filter: drop-shadow(0 0 19.5px rgba(255,255,255,0.25)); }
+  65%  { filter: drop-shadow(0 0 26px rgba(255,255,255,0.4)); }
+  90%  { filter: drop-shadow(0 0 19px rgba(255,255,255,0.22)); }
+  100% { filter: drop-shadow(0 0 16px rgba(255,255,255,0.15)); }
+}
+.soultech-flame-glow--core { animation: dsFlameGlowCore 1.7s ease-in-out infinite; }
+.soultech-flame-glow--mid { animation: dsFlameGlowMid 2.3s ease-in-out infinite; }
+.soultech-flame-glow--outer { animation: dsFlameGlowOuter 3.1s ease-in-out infinite; }
+.soultech-flame-sharp { filter: none; }
+
+/* Micro-respiración de escala de la llama (glow + copia nítida juntas,
+   mismo grupo): 1 → 1.04, con un CUARTO ritmo (2.9s) distinto de los tres
+   de arriba a propósito, para que el "crecer/encenderse" nunca coincida
+   en fase con el parpadeo del glow. Pivote = FLAME_PIVOT_X/Y (ver JSX). */
+@keyframes dsFlameScale {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.018); }
+  62%  { transform: scale(1.04); }
+  85%  { transform: scale(1.01); }
+  100% { transform: scale(1); }
+}
+.soultech-flame-scale-group { animation: dsFlameScale 2.9s ease-in-out infinite; }
+
+/* Pestaña oculta → pausar (no hay forma de hacerlo solo con CSS; el
+   componente togglea esta clase con el evento visibilitychange). */
+.soultech-logo--tab-hidden .soultech-flame-glow--core,
+.soultech-logo--tab-hidden .soultech-flame-glow--mid,
+.soultech-logo--tab-hidden .soultech-flame-glow--outer,
+.soultech-logo--tab-hidden .soultech-flame-scale-group {
+  animation-play-state: paused;
+}
+
+/* Sin movimiento: la llama queda con el glow en su estado MEDIO, fijo —
+   nada de pulso, nada de scale. */
+@media (prefers-reduced-motion: reduce) {
+  .soultech-flame-glow--core,
+  .soultech-flame-glow--mid,
+  .soultech-flame-glow--outer,
+  .soultech-flame-scale-group {
+    animation: none;
+  }
+  .soultech-flame-glow--core { filter: drop-shadow(0 0 5px rgba(255,255,255,0.75)); }
+  .soultech-flame-glow--mid { filter: drop-shadow(0 0 11px rgba(255,255,255,0.5)); }
+  .soultech-flame-glow--outer { filter: drop-shadow(0 0 21px rgba(255,255,255,0.275)); }
+}
+
+/* --- Wordmark "Soul Tech" del navbar: imagen real (public/letras.png,
+   efecto cromado/glass ya resuelto en el propio asset — no se puede
+   recolorear, y no hace falta, se ve premium sobre el fondo oscuro).
+   Centrado verticalmente junto al escudo, con un glow blanco sutil vía
+   drop-shadow. Se oculta en mobile (ver Header.jsx, isMobile) en vez de
+   con CSS, para no seguir bajando el peso de la imagen si no se va a
+   mostrar. --- */
+.soultech-wordmark-img {
+  height: 34px;
+  width: auto;
+  display: block;
+  /* Estático a propósito: el que late es el fuego del escudo, no el
+     texto — si ambos pulsaran se pierde el foco. */
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.45)) drop-shadow(0 0 20px rgba(255, 255, 255, 0.2));
+  /* letras.png trae ~7.7% de margen transparente propio antes de la "S", y
+     soultech1.png tiene ~10% de margen transparente a la derecha del
+     escudo — sumados, un gap:0 en el flex de todos modos se ve separado.
+     Este margen negativo descuenta ese aire "invisible" para que el
+     escudo y el wordmark se lean pegados, como una sola marca. */
+  margin-left: -13px;
+}
+
+/* --- Scroll del chat del asistente (ver AssistantSection.jsx) --- la
+   barra nativa por defecto es blanca en la mayoría de los navegadores y
+   rompe el dark mode del panel. Track transparente, thumb sutil que se
+   aclara en hover. Mismo tratamiento para el log de mensajes (vertical) y
+   la fila de chips (horizontal, sizing distinto: ::-webkit-scrollbar usa
+   `width` para la barra vertical pero `height` para la horizontal). */
+.ds-chat-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+.ds-chat-scroll::-webkit-scrollbar { width: 6px; height: 5px; }
+.ds-chat-scroll::-webkit-scrollbar-track { background: transparent; }
+.ds-chat-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+}
+.ds-chat-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
+/* Fila de chips: sin wrap, con scroll horizontal en vez de romper el ancho
+   de la tarjeta cuando no entran las 4-5 preguntas sugeridas. */
+.ds-chip-scroll { flex-wrap: nowrap; }

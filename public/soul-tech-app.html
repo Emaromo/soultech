@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Soul Tech — Aplicaciones a medida para tu negocio</title>
+  <meta name="description" content="Soul Tech: desarrollo de aplicaciones a medida, cloud, ciberseguridad, IA y diseño UI/UX. Córdoba, Argentina." />
+
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- React + ReactDOM + Babel (para compilar JSX en el navegador) -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+
+  <!-- Framer Motion (animaciones) -->
+  <script src="https://unpkg.com/framer-motion@11.11.17/dist/framer-motion.js"></script>
+  <script>window.Motion = window.FramerMotion;</script>
+
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: #0a0a0a; color: #fff; overflow-x: hidden; scroll-behavior: smooth; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    img { max-width: 100%; height: auto; }
+
+    /* ===== Fondo futurista base ===== */
+    .futuristic-bg {
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #0a0a0a 100%);
+      min-height: 100vh; position: relative; overflow-x: hidden;
+    }
+    .matrix-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: hidden; }
+
+    .glass-panel {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(0,255,255,0.15);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      transition: all .4s ease;
+    }
+    .panel-3d { transform-style: preserve-3d; transition: transform .5s ease; }
+    .panel-3d:hover { transform: rotateX(3deg) rotateY(-3deg) scale(1.02); }
+
+    .neon-border { position: relative; overflow: hidden; }
+    .neon-border::before {
+      content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(197,197,220,0.4), transparent);
+      transition: left .5s;
+    }
+    .neon-border:hover::before { left: 100%; }
+
+    .glow-text { text-shadow: 0 0 5px rgb(255,255,255), 0 0 3px rgb(0,0,0); }
+
+    @keyframes slideInDown { from { opacity:0; transform: translate3d(0,-100%,0);} to {opacity:1; transform:translate3d(0,0,0);} }
+    @keyframes slideInUp   { from { opacity:0; transform: translate3d(0,100%,0);} to {opacity:1; transform:translate3d(0,0,0);} }
+    @keyframes slideInLeft { from { opacity:0; transform: translate3d(-100%,0,0);} to {opacity:1; transform:translate3d(0,0,0);} }
+    @keyframes slideInRight{ from { opacity:0; transform: translate3d(100%,0,0);} to {opacity:1; transform:translate3d(0,0,0);} }
+    @keyframes fadeIn { from { opacity:0;} to {opacity:1;} }
+    .slide-in-down { animation: slideInDown 1s ease-out; }
+    .slide-in-up   { animation: slideInUp 1s ease-out; }
+    .slide-in-left { animation: slideInLeft 1s ease-out; }
+    .slide-in-right{ animation: slideInRight 1s ease-out; }
+    .fade-in       { animation: fadeIn 1s ease-out; }
+
+    @keyframes floating { 0%,100% { transform: translateY(0) rotate(0deg);} 50% { transform: translateY(-20px) rotate(180deg);} }
+    .floating-element { animation: floating 6s ease-in-out infinite; }
+
+    /* Formulas flotantes */
+    .formula-container { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; overflow:hidden; }
+    .formula { position:absolute; color:#430da7; font-family:'Courier New', monospace; font-size:14px; opacity:.3; animation: floatFormula 15s linear infinite; }
+    .formula-1{top:10%;left:10%;animation-delay:0s;} .formula-2{top:20%;right:15%;animation-delay:-3s;}
+    .formula-3{top:60%;left:20%;animation-delay:-6s;} .formula-4{top:80%;right:25%;animation-delay:-9s;}
+    .formula-5{top:40%;left:70%;animation-delay:-12s;} .formula-6{top:30%;right:40%;animation-delay:-15s;}
+    @keyframes floatFormula { 0%{transform:translateY(0) rotate(0deg);opacity:.3;} 50%{transform:translateY(-20px) rotate(2deg);opacity:.6;} 100%{transform:translateY(0) rotate(0deg);opacity:.3;} }
+
+    /* Formas geometricas */
+    .geometric-shapes { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+    .shape { position:absolute; border:1px solid rgba(0,191,255,0.2); animation: rotateShape 20s linear infinite; }
+    .square-1{width:30px;height:30px;top:15%;left:80%;animation-delay:0s;}
+    .square-2{width:25px;height:25px;top:70%;left:10%;animation-delay:-5s;}
+    .square-3{width:35px;height:35px;top:45%;right:20%;animation-delay:-10s;}
+    .square-4{width:20px;height:20px;top:25%;left:50%;animation-delay:-15s;}
+    .square-5{width:40px;height:40px;top:85%;right:60%;animation-delay:-20s;}
+    .square-6{width:28px;height:28px;top:55%;left:30%;animation-delay:-25s;}
+    .circle-1{width:32px;height:32px;border-radius:50%;top:35%;right:10%;animation-delay:-8s;border-color:rgba(147,51,234,0.3);}
+    .circle-2{width:24px;height:24px;border-radius:50%;top:75%;left:60%;animation-delay:-18s;border-color:rgba(147,51,234,0.3);}
+    .triangle-1{width:0;height:0;border-left:15px solid transparent;border-right:15px solid transparent;border-bottom:26px solid rgba(0,191,255,0.2);top:50%;right:5%;animation-delay:-12s;}
+    .triangle-2{width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:20px solid rgba(147,51,234,0.2);top:20%;left:40%;animation-delay:-22s;}
+    @keyframes rotateShape { 0%{transform:rotate(0deg) scale(1);} 50%{transform:rotate(180deg) scale(1.1);} 100%{transform:rotate(360deg) scale(1);} }
+
+    /* Lineas de conexion */
+    .connection-lines { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+    .line { position:absolute; background: linear-gradient(90deg, transparent, rgba(0,191,255,0.3), transparent); animation: pulseLine 8s ease-in-out infinite; }
+    .line-1{width:200px;height:1px;top:30%;left:20%;animation-delay:0s;}
+    .line-2{width:150px;height:1px;top:60%;right:30%;animation-delay:-2s;}
+    .line-3{width:1px;height:180px;top:40%;left:70%;animation-delay:-4s;background:linear-gradient(180deg,transparent,rgba(147,51,234,0.3),transparent);}
+    .line-4{width:1px;height:120px;top:20%;right:15%;animation-delay:-6s;background:linear-gradient(180deg,transparent,rgba(147,51,234,0.3),transparent);}
+    @keyframes pulseLine { 0%,100%{opacity:.2;transform:scale(1);} 50%{opacity:.8;transform:scale(1.05);} }
+
+    /* Particulas flotantes */
+    .particles { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+    .particle { position:absolute; width:3px; height:3px; background:#00bfff; border-radius:50%; animation: floatParticle 12s linear infinite; box-shadow:0 0 6px #00bfff; }
+    .particle-1{top:10%;left:15%;animation-delay:0s;}
+    .particle-2{top:25%;right:20%;animation-delay:-1.5s;background:#9333ea;box-shadow:0 0 6px #9333ea;}
+    .particle-3{top:45%;left:60%;animation-delay:-3s;}
+    .particle-4{top:65%;right:40%;animation-delay:-4.5s;background:#9333ea;box-shadow:0 0 6px #9333ea;}
+    .particle-5{top:80%;left:25%;animation-delay:-6s;}
+    .particle-6{top:35%;right:70%;animation-delay:-7.5s;background:#9333ea;box-shadow:0 0 6px #9333ea;}
+    .particle-7{top:55%;left:45%;animation-delay:-9s;}
+    .particle-8{top:75%;right:55%;animation-delay:-10.5s;background:#9333ea;box-shadow:0 0 6px #9333ea;}
+    @keyframes floatParticle { 0%{transform:translateY(0) translateX(0);opacity:.4;} 25%{transform:translateY(-30px) translateX(10px);opacity:1;} 50%{transform:translateY(-15px) translateX(-5px);opacity:.6;} 75%{transform:translateY(-25px) translateX(15px);opacity:.8;} 100%{transform:translateY(0) translateX(0);opacity:.4;} }
+
+    /* Cubo 3D central */
+    .single-cube-container { perspective:1000px; display:flex; justify-content:center; align-items:center; height:100vh; position:absolute; top:0; left:0; width:100%; pointer-events:none; }
+    .main-cube { position:relative; width:400px; height:400px; transform-style:preserve-3d; animation: rotateSingleCube 20s linear infinite; }
+    .face { position:absolute; width:400px; height:400px; border:2px solid rgba(0,191,255,0.3); background:rgba(0,191,255,0.05); backdrop-filter: blur(6px); box-shadow:0 0 20px rgba(0,191,255,0.2); }
+    .front{transform:translateZ(200px);} .back{transform:rotateY(180deg) translateZ(200px);background:rgba(147,51,234,0.05);border-color:rgba(147,51,234,0.3);}
+    .right{transform:rotateY(90deg) translateZ(200px);background:rgba(255,255,0,0.05);border-color:rgba(255,255,0,0.3);}
+    .left{transform:rotateY(-90deg) translateZ(200px);background:rgba(0,255,255,0.05);border-color:rgba(0,255,255,0.3);}
+    .top{transform:rotateX(90deg) translateZ(200px);background:rgba(0,255,128,0.05);border-color:rgba(0,255,128,0.3);}
+    .bottom{transform:rotateX(-90deg) translateZ(200px);background:rgba(255,0,128,0.05);border-color:rgba(255,0,128,0.3);}
+    @keyframes rotateSingleCube { 0%{transform:rotateX(0) rotateY(0);} 100%{transform:rotateX(360deg) rotateY(360deg);} }
+    @media (max-width: 768px) {
+      .main-cube, .face { width:150px; height:150px; }
+      .front{transform:translateZ(75px);} .back{transform:rotateY(180deg) translateZ(75px);}
+      .right{transform:rotateY(90deg) translateZ(75px);} .left{transform:rotateY(-90deg) translateZ(75px);}
+      .top{transform:rotateX(90deg) translateZ(75px);} .bottom{transform:rotateX(-90deg) translateZ(75px);}
+      .formula{font-size:12px;} .shape{transform:scale(.8);} .line{transform:scale(.7);} .particle{width:2px;height:2px;}
+    }
+
+    @keyframes neonPulse { 0%,100%{opacity:.6;filter:drop-shadow(0 0 6px #0ff);} 50%{opacity:1;filter:drop-shadow(0 0 14px #00ffff);} }
+    .animate-neon-line { animation: neonPulse 2.5s ease-in-out infinite; }
+
+    @keyframes borderFlow { 0%{background-position:0% 50%;} 50%{background-position:100% 50%;} 100%{background-position:0% 50%;} }
+    .animate-borderFlow { background-size:200% 200%; animation: borderFlow 4s linear infinite; }
+
+    @keyframes energyFlow { 0%{transform:translateX(-100%);opacity:.6;} 50%{opacity:1;} 100%{transform:translateX(100%);opacity:.6;} }
+    @keyframes colorShift { 0%{filter:hue-rotate(0deg);} 25%{filter:hue-rotate(90deg);} 50%{filter:hue-rotate(180deg);} 75%{filter:hue-rotate(270deg);} 100%{filter:hue-rotate(360deg);} }
+    .animate-energyFlow { animation: energyFlow 5s linear infinite, colorShift 8s linear infinite; }
+
+    @keyframes shine { 0%{transform:translateX(0);opacity:0;} 50%{opacity:.5;} 100%{transform:translateX(200%);opacity:0;} }
+    .group:hover .group-hover\:animate-shine { animation: shine 2.5s linear infinite; }
+
+    /* Footer */
+    footer { background: linear-gradient(135deg, #000814 0%, #001d3d 50%, #000814 100%); }
+    .footer-particles { position:absolute; inset:0; overflow:hidden; }
+    .footer-particle { position:absolute; bottom:0; width:4px; height:4px; background:rgba(0,255,255,0.4); border-radius:50%; animation: rise 8s linear infinite; }
+    @keyframes rise { 0%{transform:translateY(0) scale(1);opacity:.3;} 50%{opacity:.8;} 100%{transform:translateY(-100vh) scale(.5);opacity:0;} }
+    @keyframes energyGradient { 0%{background-position:0% 50%;} 50%{background-position:100% 50%;} 100%{background-position:0% 50%;} }
+    .animate-energyGradient { background: linear-gradient(90deg,#00ffff,#008cff,#7b2ff7,#00ffff); background-size:300% 100%; animation: energyGradient 6s linear infinite; }
+    .newsletter-success.show { opacity: 1 !important; }
+
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: #0a0a0a; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(#00c6ff,#7b2ff7); border-radius: 10px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" data-presets="react,env">
+    const { useState, useEffect, useRef } = React;
+    const { motion, AnimatePresence, useInView } = window.Motion;
+
+    /* ============================================================
+       Iconos SVG (equivalentes locales de lucide-react, sin CDN)
+       ============================================================ */
+    const Icon = ({ path, className, viewBox = "0 0 24 24", extra }) => (
+      <svg className={className} viewBox={viewBox} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        {path}
+        {extra}
+      </svg>
+    );
+    const Building2 = (p) => <Icon {...p} path={<>
+      <path d="M6 22V4a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v18Z"></path>
+      <path d="M6 12H4a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h2"></path>
+      <path d="M18 9h2a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-2"></path>
+      <path d="M10 6h4"></path><path d="M10 10h4"></path><path d="M10 14h4"></path><path d="M10 18h4"></path>
+    </>} />;
+    const UserCog = (p) => <Icon {...p} path={<>
+      <circle cx="9" cy="7" r="4"></circle>
+      <path d="M5.2 21a7 7 0 0 1 13.6 0"></path>
+      <circle cx="19" cy="16" r="2.5"></circle>
+      <path d="M19 12.5v.5M19 18.5v.5M22 16h-.5M16.5 16H16"></path>
+    </>} />;
+    const XIcon = (p) => <Icon {...p} path={<><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></>} />;
+    const Mail = (p) => <Icon {...p} path={<>
+      <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+    </>} />;
+    const User = (p) => <Icon {...p} path={<><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></>} />;
+    const MessageSquare = (p) => <Icon {...p} path={<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>} />;
+    const MapPin = (p) => <Icon {...p} path={<><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></>} />;
+    const Phone = (p) => <Icon {...p} path={<path d="M13.83 16.57a1 1 0 0 0 1.21-.3l.36-.47A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.75 1.56l-.47.36a1 1 0 0 0-.29 1.22 12 12 0 0 0 6.23 6.23Z"></path>} />;
+    const Clock = (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></>} />;
+    const Facebook = (p) => <Icon {...p} path={<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>} />;
+    const Instagram = (p) => <Icon {...p} path={<>
+      <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+    </>} />;
+    const Linkedin = (p) => <Icon {...p} path={<>
+      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+      <rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle>
+    </>} />;
+    const Twitter = (p) => <Icon {...p} path={<path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>} />;
+    const Send = (p) => <Icon {...p} path={<><path d="m22 2-7 20-4-9-9-4Z"></path><path d="M22 2 11 13"></path></>} />;
+    const Lightbulb = (p) => <Icon {...p} path={<>
+      <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"></path>
+      <path d="M9 18h6"></path><path d="M10 22h4"></path>
+    </>} />;
+    const FileCode2 = (p) => <Icon {...p} path={<>
+      <path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v6"></path>
+      <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+      <path d="m5 12-2 2 2 2"></path><path d="m1 16 2-2-2-2"></path>
+    </>} />;
+    const Rocket = (p) => <Icon {...p} path={<>
+      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path>
+      <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path>
+      <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path>
+      <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path>
+    </>} />;
+    const Users = (p) => <Icon {...p} path={<>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle>
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+    </>} />;
+
+    /* ============================================================
+       MatrixBackground
+       ============================================================ */
+    const MatrixBackground = () => (
+      <div className="matrix-bg">
+        <div className="single-cube-container">
+          <div className="main-cube">
+            <div className="face front"></div><div className="face back"></div>
+            <div className="face right"></div><div className="face left"></div>
+            <div className="face top"></div><div className="face bottom"></div>
+          </div>
+        </div>
+        <div className="formula-container">
+          <div className="formula formula-1">f(x) = ax² + bx + c</div>
+          <div className="formula formula-2">∑(x₁ + x₂ + ... + xₙ)</div>
+          <div className="formula formula-3">∫ f(x)dx</div>
+          <div className="formula formula-4">lim x→∞</div>
+          <div className="formula formula-5">√(a² + b²)</div>
+          <div className="formula formula-6">e^(iπ) + 1 = 0</div>
+        </div>
+        <div className="geometric-shapes">
+          <div className="shape square-1"></div><div className="shape square-2"></div>
+          <div className="shape square-3"></div><div className="shape square-4"></div>
+          <div className="shape square-5"></div><div className="shape square-6"></div>
+          <div className="shape circle-1"></div><div className="shape circle-2"></div>
+          <div className="shape triangle-1"></div><div className="shape triangle-2"></div>
+        </div>
+        <div className="connection-lines">
+          <div className="line line-1"></div><div className="line line-2"></div>
+          <div className="line line-3"></div><div className="line line-4"></div>
+        </div>
+        <div className="particles">
+          <div className="particle particle-1"></div><div className="particle particle-2"></div>
+          <div className="particle particle-3"></div><div className="particle particle-4"></div>
+          <div className="particle particle-5"></div><div className="particle particle-6"></div>
+          <div className="particle particle-7"></div><div className="particle particle-8"></div>
+        </div>
+      </div>
+    );
+
+    /* ============================================================
+       Header
+       ============================================================ */
+    const Header = () => {
+      const [menuOpen, setMenuOpen] = useState(false);
+      const [isMobile, setIsMobile] = useState(false);
+
+      useEffect(() => {
+        const checkWidth = () => setIsMobile(window.innerWidth < 768);
+        checkWidth();
+        window.addEventListener("resize", checkWidth);
+        return () => window.removeEventListener("resize", checkWidth);
+      }, []);
+
+      return (
+        <header className="fixed top-0 left-0 w-full h-20 z-50 backdrop-blur-lg border-b border-green-400/30 shadow-lg bg-black/20">
+          <motion.nav
+            className="container mx-auto px-4 sm:px-6 h-full flex justify-between items-center relative"
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            <div className="flex items-center gap-2 sm:gap-3 h-full">
+              <motion.img
+                src="soultech1.png"
+                alt="Soul Tech Logo"
+                className="h-14 sm:h-16 w-auto object-contain mix-blend-screen -mb-1"
+                style={{ filter: "drop-shadow(0 0 8px #3682a2ff) drop-shadow(0 0 9px #0f5491ff)" }}
+                animate={{ scale: [1, 1.03, 1] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <motion.img
+                src="letras.png"
+                alt="Soul Tech Texto"
+                className="h-8 sm:h-10 md:h-12 w-auto object-contain"
+                style={{ marginLeft: "-8px" }}
+                initial={{ opacity: 0.9 }}
+                animate={{ opacity: [0.9, 1, 0.9] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              />
+            </div>
+
+            <div className="hidden md:flex space-x-6 lg:space-x-8 text-base lg:text-lg">
+              {["Servicios", "Precios", "Clientes", "Contacto"].map((item) => (
+                <motion.a
+                  key={item}
+                  href={`#${item.toLowerCase()}`}
+                  className="text-gray-300 hover:text-blue-400 transition-all duration-300"
+                  whileHover={{ scale: 1.1 }}
+                >
+                  {item}
+                </motion.a>
+              ))}
+            </div>
+
+            <a
+              href="https://wa.me/5493516325887"
+              target="_blank" rel="noopener noreferrer"
+              onClick={() => setMenuOpen(false)}
+              className="hidden md:inline-block mt-2 px-6 py-2 rounded-lg font-semibold text-white text-base bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-blue-600 hover:to-cyan-500 transition-all duration-300 shadow-[0_0_10px_rgba(0,255,255,0.3)] hover:shadow-[0_0_20px_rgba(0,255,255,0.5)] text-center"
+            >
+              Cotizar Proyecto
+            </a>
+
+            {isMobile && (
+              <button onClick={() => setMenuOpen(!menuOpen)} className="text-white focus:outline-none md:hidden">
+                <motion.div animate={{ rotate: menuOpen ? 90 : 0 }} transition={{ duration: 0.3 }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                      d={menuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+                  </svg>
+                </motion.div>
+              </button>
+            )}
+          </motion.nav>
+
+          <AnimatePresence>
+            {menuOpen && isMobile && (
+              <motion.div
+                initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -30 }}
+                transition={{ duration: 0.3 }}
+                className="absolute top-20 left-0 w-full bg-[linear-gradient(120deg,rgba(60,100,150,0.55),rgba(15,30,70,0.75))] backdrop-blur-xl border-t border-blue-400/40 flex flex-col items-center space-y-4 py-6 md:hidden"
+              >
+                {["Servicios", "Precios", "Clientes", "Contacto"].map((item) => (
+                  <a key={item} href={`#${item.toLowerCase()}`} onClick={() => setMenuOpen(false)}
+                    className="text-gray-300 text-lg hover:text-blue-400 transition-all duration-300">
+                    {item}
+                  </a>
+                ))}
+                <a href="https://wa.me/5493516325887" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}
+                  className="w-11/12 py-3 rounded-lg font-semibold text-lg text-white bg-gradient-to-r from-cyan-500 to-blue-600 text-center block">
+                  Cotizar Proyecto
+                </a>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <div className="absolute bottom-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-neon-line"></div>
+        </header>
+      );
+    };
+
+    /* ============================================================
+       HeroSection
+       ============================================================ */
+    const TypewriterText = ({ text, onDone }) => {
+      const [displayed, setDisplayed] = useState("");
+      const [done, setDone] = useState(false);
+      const onDoneRef = useRef(onDone);
+      useEffect(() => {
+        let i = 0;
+        const timer = setInterval(() => {
+          i++;
+          setDisplayed(text.slice(0, i));
+          if (i >= text.length) { clearInterval(timer); setDone(true); onDoneRef.current?.(); }
+        }, 55);
+        return () => clearInterval(timer);
+      }, [text]);
+      return (<>{displayed}{!done && <span className="inline-block w-[3px] h-[0.8em] bg-cyan-400 ml-1 align-middle animate-pulse" />}</>);
+    };
+
+    const heroSlides = [
+      { title: "Cloud Computing", subtitle: "Infraestructura escalable y segura",
+        description: "Soluciones en la nube cristalinas como el hielo, brindando potencia, escalabilidad y fiabilidad para tu negocio.",
+        image: "cloud2.jpg" },
+      { title: "Ciberseguridad Avanzada", subtitle: "Protección impenetrable",
+        description: "Fortalezas digitales para tus datos. Auditorías, cifrado y monitoreo continuo con tecnología de vanguardia.",
+        image: "ciberseguridad.jpg" },
+      { title: "Inteligencia Artificial", subtitle: "Automatización Inteligente",
+        description: "Integramos IA para optimizar tus procesos, mejorar la toma de decisiones y potenciar tus resultados.",
+        image: "inteligencia.jpg" },
+      { title: "Diseño UI/UX", subtitle: "Experiencias visuales y funcionales",
+        description: "Transformamos ideas innovadoras en experiencias de marca impactantes que inspiran, generan confianza y conectan con tus clientes.",
+        image: "diseño.jpg" },
+      { title: "Apps Multiplataforma", subtitle: "Experiencias visuales y funcionales",
+        description: "Desarrollamos aplicaciones modernas que funcionan perfectamente en cualquier dispositivo.",
+        image: "multiplataforma.jpg" },
+    ];
+
+    const HeroSection = () => {
+      const [currentSlide, setCurrentSlide] = useState(0);
+      const [titleDone, setTitleDone] = useState(false);
+      const autoPlayRef = useRef();
+      const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+      const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+      useEffect(() => { autoPlayRef.current = nextSlide; });
+      useEffect(() => {
+        const play = () => autoPlayRef.current();
+        const interval = setInterval(play, 7000);
+        return () => clearInterval(interval);
+      }, []);
+      const slide = heroSlides[currentSlide];
+
+      return (
+        <section className="text-white relative flex items-center justify-center overflow-hidden"
+          style={{ background: "linear-gradient(135deg, #070707 0%, #122047 25%, #000000 60%, #022451 80%, #094185 100%)", minHeight: "100vh", padding: "6rem 1rem 4rem" }}>
+          <div className="container mx-auto px-6 text-center relative z-10 flex flex-col justify-center items-center space-y-12">
+            <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
+              <motion.h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 glow-text leading-tight"
+                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6 }}>
+                <TypewriterText text="Aplicaciones a medida" onDone={() => setTitleDone(true)} />
+                <br />
+                <motion.span initial={{ opacity: 0, y: 10 }} animate={titleDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }} transition={{ duration: 0.7 }}>
+                  para tu negocio
+                </motion.span>
+              </motion.h1>
+              <motion.p className="text-lg sm:text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-gray-300"
+                initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 1 }}>
+                Desarrollamos soluciones tecnológicas personalizadas que impulsan el crecimiento de tu empresa y optimizan tus procesos.
+              </motion.p>
+            </motion.div>
+
+            <div className="relative w-full max-w-6xl mx-auto">
+              <motion.div key={slide.image} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1.2 }}
+                className="absolute inset-0 rounded-2xl overflow-hidden"
+                style={{ backgroundImage: `url(${slide.image})`, backgroundSize: "cover", backgroundPosition: "center", zIndex: 0 }}>
+              </motion.div>
+
+              <div className="relative z-[2] bg-[rgba(0,0,0,0.35)] rounded-2xl overflow-hidden p-12 border border-cyan-500/20 shadow-[0_0_50px_rgba(0,255,255,0.15)] transition-all duration-700">
+                <AnimatePresence mode="wait">
+                  <motion.div key={currentSlide} initial={{ opacity: 0, y: 30, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -30 }} transition={{ duration: 0.8 }}>
+                    <h3 className="text-3xl md:text-4xl font-bold mb-2 text-cyan-300">{slide.title}</h3>
+                    <h4 className="text-lg md:text-xl text-green-300 mb-4">{slide.subtitle}</h4>
+                    <p className="text-gray-300 mb-6 leading-relaxed max-w-3xl mx-auto text-lg">{slide.description}</p>
+                  </motion.div>
+                </AnimatePresence>
+
+                <div className="flex justify-center gap-3 mt-8">
+                  {heroSlides.map((_, i) => (
+                    <span key={i} onClick={() => setCurrentSlide(i)}
+                      className={`w-3 h-3 rounded-full cursor-pointer transition-all ${i === currentSlide ? "bg-cyan-400 scale-125 shadow-[0_0_10px_rgba(0,255,255,0.8)]" : "bg-white/20"}`}>
+                    </span>
+                  ))}
+                </div>
+
+                <button onClick={prevSlide} className="absolute top-1/2 left-6 transform -translate-y-1/2 bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-3xl w-14 h-14 rounded-full hover:bg-cyan-500/30 transition-all">‹</button>
+                <button onClick={nextSlide} className="absolute top-1/2 right-6 transform -translate-y-1/2 bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-3xl w-14 h-14 rounded-full hover:bg-cyan-500/30 transition-all">›</button>
+              </div>
+            </div>
+
+            <motion.div className="flex justify-center" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.8 }}>
+              <a href="https://wa.me/5493516325887?text=Hola%2C%20quiero%20comenzar%20un%20proyecto%20con%20Soul%20Tech"
+                target="_blank" rel="noopener noreferrer"
+                className="relative inline-block w-full md:w-auto px-12 py-5 rounded-xl font-semibold text-2xl text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-blue-600 hover:to-cyan-500 transition-all duration-300 shadow-[0_0_25px_rgba(0,255,255,0.4)] hover:shadow-[0_0_40px_rgba(0,255,255,0.6)] overflow-hidden group">
+                <span className="relative z-10">Comenzar Proyecto</span>
+                <span className="absolute inset-0 rounded-xl p-[2px] bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-400 opacity-70 blur-[3px] animate-borderFlow"></span>
+              </a>
+            </motion.div>
+          </div>
+        </section>
+      );
+    };
+
+    /* ============================================================
+       StatsSection
+       ============================================================ */
+    const statsData = [
+      { value: 50, suffix: "+", label: "Proyectos entregados", color: "text-cyan-400", glow: "rgba(0,255,255,0.3)" },
+      { value: 30, suffix: "+", label: "Clientes activos", color: "text-blue-400", glow: "rgba(59,130,246,0.3)" },
+      { value: 3, suffix: "+", label: "Años de experiencia", color: "text-purple-400", glow: "rgba(168,85,247,0.3)" },
+      { value: 98, suffix: "%", label: "Clientes satisfechos", color: "text-green-400", glow: "rgba(74,222,128,0.3)" },
+    ];
+    const Counter = ({ value, suffix, duration = 1800 }) => {
+      const [count, setCount] = useState(0);
+      const ref = useRef(null);
+      const inView = useInView(ref, { once: true });
+      useEffect(() => {
+        if (!inView) return;
+        let current = 0;
+        const step = value / (duration / 16);
+        const timer = setInterval(() => {
+          current += step;
+          if (current >= value) { setCount(value); clearInterval(timer); }
+          else setCount(Math.floor(current));
+        }, 16);
+        return () => clearInterval(timer);
+      }, [inView, value, duration]);
+      return <span ref={ref}>{count}{suffix}</span>;
+    };
+    const StatsSection = () => (
+      <section className="py-14 relative">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+            {statsData.map((stat, i) => (
+              <motion.div key={i} className="glass-panel rounded-xl p-6 text-center"
+                initial={{ opacity: 0, scale: 0.75, y: 20 }} whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.55, delay: i * 0.1, ease: "easeOut" }}
+                whileHover={{ scale: 1.06, boxShadow: `0 0 35px ${stat.glow}` }}>
+                <div className={`text-4xl sm:text-5xl font-bold mb-2 ${stat.color}`}><Counter value={stat.value} suffix={stat.suffix} /></div>
+                <div className="text-gray-400 text-sm mt-1">{stat.label}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+
+    /* ============================================================
+       ServicesSection
+       ============================================================ */
+    const servicesData = [
+      { title: "Apps Móviles", color: "text-cyan-400",
+        d: "M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z",
+        description: "Aplicaciones nativas e híbridas para iOS y Android, diseñadas para ofrecer la mejor experiencia de usuario.",
+        features: ["React Native & Flutter", "Diseño UX/UI personalizado", "Integración con APIs"] },
+      { title: "Aplicaciones Web", color: "text-blue-400",
+        d: "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+        description: "Plataformas web robustas y escalables que se adaptan perfectamente a los procesos de tu empresa.",
+        features: ["React, Vue.js, Angular", "Arquitectura escalable", "Responsive design"] },
+      { title: "Sistemas Backend", color: "text-purple-400",
+        d: "M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4",
+        description: "APIs y sistemas backend seguros y eficientes para gestionar toda la lógica de negocio de tu aplicación.",
+        features: ["Node.js, Python, .NET", "Bases de datos optimizadas", "Seguridad avanzada"] },
+      { title: "Apps Multiplataforma", color: "text-cyan-300",
+        d: "M3 7l9-4 9 4v6c0 5-4 9-9 9s-9-4-9-9V7z",
+        description: "Desarrollamos aplicaciones que funcionan sin problemas en cualquier dispositivo, con un diseño responsivo y una experiencia coherente entre plataformas.",
+        features: ["Tecnologías híbridas modernas", "Optimización de rendimiento móvil y web", "Interfaz adaptable a pantallas"] },
+      { title: "Diseño UX/UI", color: "text-indigo-400",
+        d: "M12 4v16m8-8H4",
+        description: "Creamos experiencias visuales elegantes y funcionales, centradas en el usuario y alineadas con la identidad de tu marca.",
+        features: ["Prototipos interactivos", "Diseños modernos y minimalistas", "Flujos de navegación intuitivos"] },
+      { title: "Consultoría Tecnológica", color: "text-blue-300",
+        d: "M13 10V3L4 14h7v7l9-11h-7z",
+        description: "Te acompañamos en todo el proceso de transformación digital, desde la idea hasta la implementación final del producto.",
+        features: ["Análisis de requerimientos", "Estrategia tecnológica", "Soporte y mantenimiento continuo"] },
+    ];
+    const ServicesSection = () => (
+      <section id="servicios" className="py-20 futuristic-bg relative">
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="text-center mb-16 slide-in-down">
+            <h2 className="text-4xl font-bold text-white mb-4 glow-text">Nuestros Servicios</h2>
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+              Ofrecemos soluciones completas y personalizadas para potenciar tu presencia digital y optimizar tus procesos de negocio.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {servicesData.map((service, index) => (
+              <motion.div key={index} className="glass-panel p-8 rounded-xl"
+                initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.55, delay: (index % 3) * 0.1, ease: "easeOut" }}
+                whileHover={{ y: -10, scale: 1.02, boxShadow: "0 0 40px rgba(0,255,255,0.2)" }}>
+                <div className="w-16 h-16 glass-panel rounded-lg flex items-center justify-center mb-6 neon-border">
+                  <svg className={`w-8 h-8 ${service.color}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={service.d}></path>
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-4 glow-text">{service.title}</h3>
+                <p className="text-gray-300 mb-6">{service.description}</p>
+                <ul className="text-sm text-gray-400 space-y-2">
+                  {service.features.map((feature, idx) => <li key={idx}>• {feature}</li>)}
+                </ul>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+        <div className="absolute top-10 right-20 w-32 h-32 border border-blue-500/20 rotate-12 floating-element"></div>
+        <div className="absolute bottom-10 left-20 w-24 h-24 border border-purple-500/20 rotate-45 floating-element" style={{ animationDelay: "-3s" }}></div>
+      </section>
+    );
+
+    /* ============================================================
+       ClientsSection
+       ============================================================ */
+    const ClientsSection = () => {
+      const [selectedImage, setSelectedImage] = useState(null);
+      const [currentIndexes, setCurrentIndexes] = useState({});
+      const projectExamples = [
+        { title: "App para Comercios", images: ["Captura.PNG", "Captura1.PNG", "Captura33.PNG"], desc: "Sistema de gestión de ventas, stock y promociones en tiempo real." },
+        { title: "Panel para Profesionales", images: ["psico.jpg", "img3.jpg"], desc: "Dashboard para técnicos, psicólogos o entrenadores con seguimiento de clientes." },
+        { title: "Landing Page Empresarial", images: ["tiket1.jpg", "dashclient.jpg", "login.jpg"], desc: "Diseño moderno y optimizado para captar clientes desde la web." },
+      ];
+
+      useEffect(() => {
+        const interval = setInterval(() => {
+          setCurrentIndexes((prev) => {
+            const next = { ...prev };
+            projectExamples.forEach((proj, i) => { next[i] = ((prev[i] ?? 0) + 1) % proj.images.length; });
+            return next;
+          });
+        }, 3500);
+        return () => clearInterval(interval);
+      }, []);
+
+      return (
+        <motion.section id="clientes" className="relative overflow-hidden bg-transparent py-20"
+          initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.9 }} viewport={{ once: true }}>
+          <div className="container mx-auto px-6 relative z-10">
+            <div className="text-center mb-12">
+              <h3 className="text-3xl font-bold text-white mb-6 glow-text">Aplicaciones exitosas de nuestros clientes</h3>
+              <p className="text-gray-400 max-w-2xl mx-auto">
+                Interfaces modernas y funcionales creadas para diferentes rubros. Cada diseño se adapta a la identidad de tu negocio.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-8">
+              {projectExamples.map((proj, i) => {
+                const active = proj.images[currentIndexes[i] || 0];
+                return (
+                  <motion.div key={i} onClick={() => setSelectedImage(active)}
+                    className="group relative glass-panel panel-3d rounded-2xl overflow-hidden cursor-pointer border border-white/10 bg-gradient-to-b from-[#101020]/70 to-[#1a1a2e]/80"
+                    initial={{ opacity: 0, y: 30, scale: 0.95 }} whileInView={{ opacity: 1, y: 0, scale: 1 }} viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: i * 0.15 }}
+                    whileHover={{ y: -6, scale: 1.03, boxShadow: "0 0 30px rgba(255,255,255,0.25)" }}>
+                    <img src={active} alt={proj.title} loading="lazy" className="w-full h-56 object-cover opacity-90" />
+                    <div className="p-6 text-center">
+                      <h4 className="text-xl font-semibold mb-2 text-white">{proj.title}</h4>
+                      <p className="text-gray-400 text-sm">{proj.desc}</p>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+
+          <AnimatePresence>
+            {selectedImage && (
+              <motion.div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50"
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedImage(null)}>
+                <motion.div className="relative max-w-5xl mx-auto p-4" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}>
+                  <button onClick={() => setSelectedImage(null)} className="absolute top-4 right-4 text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition">
+                    <XIcon className="w-6 h-6" />
+                  </button>
+                  <img src={selectedImage} alt="Vista ampliada" className="rounded-2xl max-h-[80vh] object-contain shadow-lg" />
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.section>
+      );
+    };
+
+    /* ============================================================
+       PricingSection
+       ============================================================ */
+    const PricingSection = () => (
+      <section id="precios" className="py-20 futuristic-bg relative">
+        <div className="geometric-shapes">
+          <div className="shape square-1"></div><div className="shape square-2"></div>
+          <div className="shape circle-1"></div><div className="shape triangle-1"></div>
+        </div>
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="text-center mb-16 slide-in-down">
+            <h2 className="text-4xl font-bold text-white mb-4 glow-text">Planes y Servicios</h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              Soluciones flexibles con actualizaciones mensuales para mantener tu aplicación siempre al día
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Plan 1 */}
+            <motion.div className="glass-panel p-8 rounded-xl relative overflow-hidden"
+              initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.6 }}
+              whileHover={{ y: -8, scale: 1.02, boxShadow: "0 0 40px rgba(0,255,255,0.25)" }}>
+              <div className="absolute top-0 right-0 bg-gradient-to-l from-cyan-500 to-blue-600 text-white px-4 py-2 rounded-bl-lg text-sm font-semibold">🔧 EXCLUSIVO</div>
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold text-white mb-2 glow-text">Aplicación a Medida</h3>
+                <p className="text-gray-300 text-sm">Solución única y personalizada</p>
+              </div>
+              <div className="mb-6">
+                <div className="text-sm text-gray-400">Costo inicial + mensualidad según complejidad</div>
+              </div>
+              <div className="space-y-3 mb-8">
+                {["Desarrollo exclusivo y hecho a medida", "Client Dashboard (panel del cliente)", "Admin Dashboard (panel administrativo)", "Landing Page de presentación incluida", "Dominio gratis por un año", "Actualizaciones mensuales incluidas"].map((item, i) => (
+                  <div key={i} className="flex items-start space-x-3">
+                    <div className="w-5 h-5 rounded-full bg-cyan-500/20 flex items-center justify-center mt-0.5"><div className="w-2 h-2 rounded-full bg-cyan-400"></div></div>
+                    <span className="text-gray-300 text-sm">{item}</span>
+                  </div>
+                ))}
+              </div>
+              <button onClick={() => window.open("https://wa.me/5493516325887?text=Hola%2C%20estoy%20interesado%20en%20el%20plan%20Aplicaci%C3%B3n%20a%20Medida.%20%F0%9F%94%A7", "_blank")}
+                className="w-full glass-panel px-6 py-3 rounded-lg text-white font-semibold hover:bg-cyan-500/20 transition-all duration-300 neon-border">
+                Solicitar Cotización
+              </button>
+              <div className="mt-4 text-center"><span className="text-xs text-green-400">✅ Ideal para soluciones únicas y personalizadas</span></div>
+            </motion.div>
+
+            {/* Plan 2 */}
+            <motion.div className="glass-panel p-8 rounded-xl relative overflow-hidden"
+              initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.6, delay: 0.15 }}
+              whileHover={{ y: -8, scale: 1.02, boxShadow: "0 0 40px rgba(168,85,247,0.25)" }}>
+              <div className="absolute top-0 right-0 bg-gradient-to-l from-purple-500 to-blue-600 text-white px-4 py-2 rounded-bl-lg text-sm font-semibold">🛒 POPULAR</div>
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold text-white mb-2 glow-text">Aplicación Compartida</h3>
+                <p className="text-gray-300 text-sm">Acceso rápido sin inversión inicial</p>
+              </div>
+              <div className="mb-6">
+                <div className="text-3xl font-bold text-purple-400 mb-2">Sin costo inicial</div>
+                <div className="text-sm text-gray-400">Suscripción mensual</div>
+              </div>
+              <div className="space-y-3 mb-8">
+                {["Acceso a sistema ya desarrollado", "Client Dashboard (panel del cliente)", "Admin Dashboard (panel administrativo)", "Actualizaciones mensuales incluidas", "Mejoras y nuevas funciones", "Entrada rápida al sistema"].map((item, i) => (
+                  <div key={i} className="flex items-start space-x-3">
+                    <div className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center mt-0.5"><div className="w-2 h-2 rounded-full bg-purple-400"></div></div>
+                    <span className="text-gray-300 text-sm">{item}</span>
+                  </div>
+                ))}
+              </div>
+              <button onClick={() => window.open("https://wa.me/5493516325887?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20el%20plan%20Aplicaci%C3%B3n%20Compartida.%20%F0%9F%9B%92", "_blank")}
+                className="w-full glass-panel px-6 py-3 rounded-lg text-white font-semibold hover:bg-purple-500/20 transition-all duration-300 neon-border">
+                Comenzar Suscripción
+              </button>
+              <div className="mt-4 text-center"><span className="text-xs text-green-400">✅ Perfecto para entrada rápida sin desarrollo exclusivo</span></div>
+            </motion.div>
+
+            {/* Plan 3 */}
+            <motion.div className="glass-panel p-8 rounded-xl relative overflow-hidden"
+              initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.6, delay: 0.3 }}
+              whileHover={{ y: -8, scale: 1.02, boxShadow: "0 0 40px rgba(74,222,128,0.25)" }}>
+              <div className="absolute top-0 right-0 bg-gradient-to-l from-green-500 to-blue-600 text-white px-4 py-2 rounded-bl-lg text-sm font-semibold">🌐 BÁSICO</div>
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold text-white mb-2 glow-text">Landing Page</h3>
+                <p className="text-gray-300 text-sm">Presencia web profesional</p>
+              </div>
+              <div className="mb-6"><div className="text-sm text-gray-400">Costo inicial + mantenimiento semestral</div></div>
+              <div className="space-y-3 mb-8">
+                {["Página web informativa y profesional", "Formulario de contacto", "Encuestas vía WhatsApp", "Dominio incluido por 6 meses", "Actualizaciones cada 6 meses", "Generación de contactos"].map((item, i) => (
+                  <div key={i} className="flex items-start space-x-3">
+                    <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center mt-0.5"><div className="w-2 h-2 rounded-full bg-green-400"></div></div>
+                    <span className="text-gray-300 text-sm">{item}</span>
+                  </div>
+                ))}
+              </div>
+              <button onClick={() => window.open("https://wa.me/5493516325887?text=Hola%2C%20me%20gustar%C3%ADa%20crear%20una%20Landing%20Page.%20%F0%9F%8C%90", "_blank")}
+                className="w-full glass-panel px-6 py-3 rounded-lg text-white font-semibold hover:bg-green-500/20 transition-all duration-300 neon-border">
+                Crear Landing Page
+              </button>
+              <div className="mt-4 text-center"><span className="text-xs text-green-400">✅ Ideal para atraer clientes y generar contactos</span></div>
+            </motion.div>
+          </div>
+
+          <div className="mt-16 hidden md:block">
+            <h3 className="text-2xl font-bold text-white text-center mb-8 glow-text">Resumen Comparativo</h3>
+            <div className="glass-panel rounded-xl overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-white">
+                  <thead className="bg-white/5">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Servicio</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-gray-300">Costo Inicial</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-gray-300">Mensualidad</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-gray-300">Mantenimiento</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Incluye</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/10">
+                    <tr className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4 font-medium text-cyan-400">Aplicación a Medida</td>
+                      <td className="px-6 py-4 text-center">Sí</td><td className="px-6 py-4 text-center">Sí</td><td className="px-6 py-4 text-center">–</td>
+                      <td className="px-6 py-4 text-sm text-gray-300">App exclusiva + Dashboards + Landing + Dominio 1 año</td>
+                    </tr>
+                    <tr className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4 font-medium text-purple-400">Aplicación Compartida</td>
+                      <td className="px-6 py-4 text-center">–</td><td className="px-6 py-4 text-center">Sí</td><td className="px-6 py-4 text-center">–</td>
+                      <td className="px-6 py-4 text-sm text-gray-300">Sistema estándar + Dashboards + Actualizaciones</td>
+                    </tr>
+                    <tr className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4 font-medium text-green-400">Landing Page</td>
+                      <td className="px-6 py-4 text-center">Sí</td><td className="px-6 py-4 text-center">–</td><td className="px-6 py-4 text-center">Sí</td>
+                      <td className="px-6 py-4 text-sm text-gray-300">Página web + Formularios + WhatsApp + Dominio 6 meses</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+
+    /* ============================================================
+       ProcessSection
+       ============================================================ */
+    const ProcessSection = () => {
+      const steps = [
+        { title: "1. Análisis y Reunión Inicial", Icon: Lightbulb, color: "text-cyan-400", desc: "Escuchamos tus necesidades y analizamos tu negocio para definir objetivos claros y crear una propuesta a medida." },
+        { title: "2. Diseño y Planificación", Icon: FileCode2, color: "text-blue-400", desc: "Diseñamos la interfaz con enfoque en experiencia de usuario, estética y coherencia visual con tu marca." },
+        { title: "3. Desarrollo y Pruebas", Icon: Rocket, color: "text-purple-400", desc: "Desarrollamos tu aplicación con pruebas continuas para asegurar calidad, seguridad y rendimiento." },
+        { title: "4. Lanzamiento y Acompañamiento", Icon: Users, color: "text-green-400", desc: "Lanzamos la app y brindamos soporte y actualizaciones para acompañar el crecimiento de tu negocio." },
+      ];
+      return (
+        <section id="procesos" className="py-24 futuristic-bg relative overflow-hidden">
+          <div className="container mx-auto px-6 relative z-10">
+            <div className="text-center mb-20 slide-in-down">
+              <h2 className="text-4xl font-bold text-white mb-4 glow-text">Nuestros Procesos</h2>
+              <p className="text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed">
+                Así trabajamos cada proyecto: desde la idea inicial hasta el lanzamiento y acompañamiento continuo. Un proceso claro, ágil y personalizado para cada cliente.
+              </p>
+            </div>
+            <div className="relative flex flex-wrap lg:flex-nowrap justify-center items-start gap-10">
+              <div className="hidden lg:block absolute top-[3.8rem] left-0 w-full h-[4px] rounded-full overflow-hidden bg-[rgba(255,255,255,0.1)]">
+                <div className="absolute top-0 left-0 h-full w-full bg-[linear-gradient(90deg,transparent,rgba(0,255,255,0.8),rgba(255,255,255,0.8),transparent)] animate-energyFlow"></div>
+              </div>
+              {steps.map((step, i) => {
+                const StepIcon = step.Icon;
+                return (
+                  <motion.div key={i} className="relative glass-panel text-center p-6 rounded-2xl border border-white/10 flex-1 min-w-[240px] max-w-[260px] min-h-[260px] flex flex-col justify-between bg-white/5 backdrop-blur-sm"
+                    initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-60px" }}
+                    transition={{ duration: 0.55, ease: "easeOut", delay: i * 0.15 }}
+                    whileHover={{ y: -8, boxShadow: "0 0 40px rgba(255,255,255,0.25)" }}>
+                    <div className="hidden lg:flex justify-center absolute -top-6 left-1/2 transform -translate-x-1/2">
+                      <div className="w-4 h-4 rounded-full bg-white shadow-[0_0_20px_rgba(255,255,255,0.8)] animate-pulse"></div>
+                    </div>
+                    <div className="flex justify-center mb-3"><StepIcon className={`w-8 h-8 ${step.color}`} /></div>
+                    <h3 className="text-lg font-semibold text-white mb-2">{step.title}</h3>
+                    <p className="text-gray-300 text-sm leading-relaxed">{step.desc}</p>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+          <div className="absolute top-16 right-20 w-24 h-24 border border-blue-500/20 rotate-12 floating-element"></div>
+          <div className="absolute bottom-10 left-10 w-20 h-20 border border-purple-500/20 rotate-45 floating-element" style={{ animationDelay: "-3s" }}></div>
+        </section>
+      );
+    };
+
+    /* ============================================================
+       ContactSection
+       ============================================================ */
+    const ContactSection = () => {
+      const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        const { name, email, message } = formData;
+        const whatsappNumber = "5493516325887";
+        const text = `Hola! 👋 Soy ${name}%0A📧 Email: ${email}%0A💬 Mensaje: ${message}`;
+        window.open(`https://wa.me/${whatsappNumber}?text=${text}`, "_blank");
+      };
+      const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+      };
+      return (
+        <section id="contacto" className="py-20 futuristic-bg relative overflow-hidden">
+          <div className="container mx-auto px-6 relative z-10">
+            <div className="text-center mb-16 slide-in-down">
+              <h2 className="text-4xl font-bold text-white mb-4 glow-text">Contacto</h2>
+              <p className="text-xl text-gray-300">¿Listo para comenzar tu proyecto con nosotros?</p>
+              <p className="text-gray-400 mt-2">Contanos tu idea y te responderemos con una propuesta personalizada.</p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-10 max-w-5xl mx-auto">
+              <div className="relative glass-panel p-10 rounded-2xl border border-white/10 bg-gradient-to-br from-[#0a0a0a]/80 to-[#1a1a2e]/80 backdrop-blur-md shadow-[0_0_30px_rgba(255,255,255,0.1)] group overflow-hidden">
+                <div className="absolute inset-0 pointer-events-none before:content-[''] before:absolute before:top-0 before:left-[-75%] before:w-[50%] before:h-full before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent before:rotate-12 group-hover:before:animate-shine"></div>
+                <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+                  <div className="relative">
+                    <User className="absolute left-4 top-3 text-gray-400 w-5 h-5" />
+                    <input type="text" name="name" placeholder="Tu nombre" value={formData.name} onChange={handleChange} required
+                      className="w-full bg-white/5 border border-white/10 rounded-lg py-3 pl-12 pr-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" />
+                  </div>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-3 text-gray-400 w-5 h-5" />
+                    <input type="email" name="email" placeholder="Tu correo electrónico" value={formData.email} onChange={handleChange} required
+                      className="w-full bg-white/5 border border-white/10 rounded-lg py-3 pl-12 pr-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all" />
+                  </div>
+                  <div className="relative">
+                    <MessageSquare className="absolute left-4 top-3 text-gray-400 w-5 h-5" />
+                    <textarea name="message" rows="4" placeholder="Tu mensaje" value={formData.message} onChange={handleChange} required
+                      className="w-full bg-white/5 border border-white/10 rounded-lg py-3 pl-12 pr-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all resize-none"></textarea>
+                  </div>
+                  <button type="submit" className="w-full py-3 rounded-lg font-semibold text-lg text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-blue-600 hover:to-cyan-500 transition-all duration-300 shadow-[0_0_15px_rgba(0,255,255,0.3)] hover:shadow-[0_0_25px_rgba(0,255,255,0.5)]">
+                    Enviar por WhatsApp
+                  </button>
+                </form>
+              </div>
+
+              <div className="glass-panel p-10 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.1)] flex flex-col justify-between">
+                <div>
+                  <h3 className="text-2xl font-semibold text-white mb-6">Información de contacto</h3>
+                  <div className="space-y-4 text-gray-300">
+                    <div className="flex items-start gap-3"><MapPin className="w-6 h-6 text-cyan-400 mt-1" /><p>Lima 438, Córdoba, Argentina</p></div>
+                    <div className="flex items-center gap-3"><Phone className="w-6 h-6 text-cyan-400" /><p>+54 9 351 632-5887</p></div>
+                    <div className="flex items-center gap-3"><Mail className="w-6 h-6 text-cyan-400" /><p>techsolution@gmail.com</p></div>
+                    <div className="flex items-center gap-3"><Clock className="w-6 h-6 text-cyan-400" /><p>Lunes a Viernes – 9:00 a 18:00 hs</p></div>
+                  </div>
+                </div>
+                <div className="mt-8 rounded-xl overflow-hidden border border-white/10 shadow-[0_0_15px_rgba(0,255,255,0.1)]">
+                  <iframe title="Mapa Soul Tech"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13747.86816707953!2d-64.19521355975393!3d-31.41733923846899!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9432a28e7b7a3f3f%3A0x6a8d0277c2e2f3ef!2sC%C3%B3rdoba%2C%20Argentina!5e0!3m2!1ses-419!2sar!4v1706900000000!5m2!1ses-419!2sar"
+                    width="100%" height="220" style={{ border: 0 }} allowFullScreen="" loading="lazy" className="rounded-lg"></iframe>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    /* ============================================================
+       Footer
+       ============================================================ */
+    const FooterSoulTech = () => {
+      useEffect(() => {
+        const container = document.getElementById("footer-particles");
+        if (!container) return;
+        container.innerHTML = "";
+        for (let i = 0; i < 30; i++) {
+          const p = document.createElement("div");
+          p.className = "footer-particle";
+          p.style.left = Math.random() * 100 + "%";
+          p.style.animationDuration = 6 + Math.random() * 8 + "s";
+          p.style.animationDelay = Math.random() * 5 + "s";
+          container.appendChild(p);
+        }
+      }, []);
+
+      const handleSubscribe = (e) => {
+        e.preventDefault();
+        const success = document.getElementById("newsletter-success");
+        success.classList.add("show");
+        setTimeout(() => success.classList.remove("show"), 4000);
+      };
+
+      return (
+        <footer className="relative overflow-hidden mt-0 text-center md:text-left">
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#0a0a1a] to-[#101020]"></div>
+          <div id="footer-particles" className="absolute inset-0 footer-particles"></div>
+          <div className="absolute top-0 left-0 w-full h-[4px] z-20">
+            <div className="w-[200%] h-full animate-energyGradient shadow-[0_0_25px_5px_rgba(0,255,255,0.4)]"></div>
+          </div>
+          <div className="relative z-10 container mx-auto px-6 py-16 text-gray-300 mt-[4px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12 mb-10 place-items-center md:place-items-start">
+              <div className="flex flex-col items-center md:items-start text-center md:text-left">
+                <img src="letras.png" alt="Soul Tech" className="w-44 mb-4 select-none" />
+                <p className="text-sm text-gray-400 leading-relaxed max-w-xs">
+                  Tecnología, diseño y visión del futuro. <br />
+                  Impulsamos tu crecimiento con innovación real y soluciones digitales inteligentes.
+                </p>
+                <div className="flex justify-center md:justify-start gap-4 mt-5">
+                  {[{ Icon: Facebook, color: "#1877F2" }, { Icon: Instagram, color: "#E4405F" }, { Icon: Linkedin, color: "#0A66C2" }, { Icon: Twitter, color: "#1DA1F2" }].map(({ Icon: SocialIcon, color }, i) => (
+                    <a key={i} href="#" className="p-2 rounded-full bg-white/5 border border-white/10 transition hover:scale-110 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                      <SocialIcon className="w-5 h-5" style={{ color }} />
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center md:items-start">
+                <h3 className="text-lg font-semibold text-white mb-4">Servicios</h3>
+                <ul className="space-y-2 text-gray-400 text-sm">
+                  <li>Aplicaciones a medida</li><li>IA & Automatización</li><li>Diseño Web Avanzado</li><li>Soporte técnico</li>
+                </ul>
+              </div>
+
+              <div className="flex flex-col items-center md:items-start">
+                <h3 className="text-lg font-semibold text-white mb-4">Empresa</h3>
+                <ul className="space-y-2 text-gray-400 text-sm">
+                  <li>Sobre nosotros</li><li>Carreras</li><li>Casos de éxito</li><li>Contacto</li>
+                </ul>
+              </div>
+
+              <div className="flex flex-col items-center md:items-start text-center md:text-left">
+                <h3 className="text-lg font-semibold text-white mb-4">Suscribite</h3>
+                <p className="text-sm text-gray-400 mb-3 max-w-xs">Recibí novedades, promociones y lanzamientos tecnológicos antes que nadie.</p>
+                <form onSubmit={handleSubscribe} className="flex w-full max-w-xs sm:max-w-sm items-center bg-white/5 border border-white/10 rounded-full overflow-hidden focus-within:ring-2 focus-within:ring-cyan-400 transition-all">
+                  <Mail className="w-5 h-5 ml-4 text-gray-400" />
+                  <input type="email" placeholder="tu@email.com" required className="flex-grow bg-transparent text-white placeholder-gray-500 px-3 py-3 focus:outline-none" />
+                  <button type="submit" className="bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-3 text-white hover:from-blue-600 hover:to-purple-500 transition-all">
+                    <Send className="w-5 h-5" />
+                  </button>
+                </form>
+                <div className="newsletter-success text-cyan-400 mt-3 text-sm opacity-0 transition-opacity duration-500" id="newsletter-success">
+                  ✅ ¡Gracias por suscribirte!
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-white/10 pt-6 text-center text-sm text-gray-500">
+              © 2025 <span className="text-white font-medium">Soul Tech</span> — Innovación digital futurista
+            </div>
+          </div>
+        </footer>
+      );
+    };
+
+    /* ============================================================
+       Landing (App root)
+       ============================================================ */
+    const Landing = () => (
+      <div className="futuristic-bg">
+        <MatrixBackground />
+        <Header />
+        <HeroSection />
+        <StatsSection />
+        <ServicesSection />
+        <ClientsSection />
+        <PricingSection />
+        <ProcessSection />
+        <ContactSection />
+        <FooterSoulTech />
+      </div>
+    );
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<Landing />);
+  </script>
+</body>
+</html>

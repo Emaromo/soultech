@@ -1,207 +1,227 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Smartphone, Globe, Server, Layers, Palette, Lightbulb, BrainCircuit, ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
+import useCoverflow from "./useCoverflow";
+import AmbientParticles from "./AmbientParticles";
+import SectionBackdrop from "./SectionBackdrop";
+import { GlassReflection, GlassContactLight, GlassFloor } from "./GlassCard";
+import { CARD_ASPECT_RATIO, CARD_PADDING, cardWidthFor, cardGapMultFor, cardTrackHeightFor } from "./cardTokens";
+
+const services = [
+  {
+    Icon: Smartphone,
+    title: "Apps Móviles",
+    desc: "Aplicaciones nativas e híbridas para iOS y Android, rápidas y pensadas para tus usuarios.",
+    techLabel: "TECNOLOGÍAS",
+    tech: ["React Native", "Flutter", "Swift", "Kotlin"],
+    features: ["iOS y Android", "Notificaciones push", "Publicación en stores"],
+  },
+  {
+    Icon: Globe,
+    title: "Aplicaciones Web",
+    desc: "Plataformas web modernas, seguras y escalables, accesibles desde cualquier dispositivo.",
+    techLabel: "TECNOLOGÍAS",
+    tech: ["React", "Next.js", "TypeScript", "Tailwind"],
+    features: ["Paneles de gestión", "Diseño responsive", "Alta performance"],
+  },
+  {
+    Icon: Server,
+    title: "Sistemas Backend",
+    desc: "APIs y arquitecturas robustas que sostienen tu operación y crecen con tu negocio.",
+    techLabel: "TECNOLOGÍAS",
+    tech: ["Node.js", "Python", "PostgreSQL", "Docker"],
+    features: ["APIs REST", "Bases de datos", "Integraciones"],
+  },
+  {
+    Icon: Layers,
+    title: "Apps Multiplataforma",
+    desc: "Un solo desarrollo que funciona en web, mobile y escritorio, optimizando tiempos y costos.",
+    techLabel: "TECNOLOGÍAS",
+    tech: ["React Native", "Expo", "Electron"],
+    features: ["Código unificado", "Menor costo", "Actualización simultánea"],
+  },
+  {
+    Icon: Palette,
+    title: "Diseño UX/UI",
+    desc: "Interfaces intuitivas y atractivas que convierten visitantes en clientes.",
+    techLabel: "TECNOLOGÍAS",
+    tech: ["Figma", "Prototipado", "Design System"],
+    features: ["Prototipado", "Identidad visual", "Pruebas con usuarios"],
+  },
+  {
+    Icon: Lightbulb,
+    title: "Consultoría Tecnológica",
+    desc: "Te acompañamos a definir la estrategia digital correcta para tu empresa.",
+    techLabel: "INCLUYE",
+    tech: ["Auditoría", "Estrategia", "Roadmap"],
+    features: ["Auditoría técnica", "Roadmap digital", "Optimización de procesos"],
+  },
+  {
+    Icon: BrainCircuit,
+    title: "Agentes de IA",
+    desc: "Asistentes inteligentes que automatizan tareas y responden por vos, integrados a tus sistemas.",
+    techLabel: "TECNOLOGÍAS",
+    tech: ["LLMs", "RAG", "Automatizaciones", "APIs"],
+    features: ["Atención automatizada 24/7", "Integración con tus datos", "Flujos de trabajo autónomos"],
+  },
+];
 
 const ServicesSection = () => {
-  const services = [
-    {
-      icon: (
-        <svg
-          className="w-8 h-8 text-cyan-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
-          ></path>
-        </svg>
-      ),
-      title: "Apps Móviles",
-      description:
-        "Aplicaciones nativas e híbridas para iOS y Android, diseñadas para ofrecer la mejor experiencia de usuario.",
-      features: [
-        "React Native & Flutter",
-        "Diseño UX/UI personalizado",
-        "Integración con APIs",
-      ],
-      animation: "slide-in-left",
-    },
-    {
-      icon: (
-        <svg
-          className="w-8 h-8 text-blue-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-          ></path>
-        </svg>
-      ),
-      title: "Aplicaciones Web",
-      description:
-        "Plataformas web robustas y escalables que se adaptan perfectamente a los procesos de tu empresa.",
-      features: [
-        "React, Vue.js, Angular",
-        "Arquitectura escalable",
-        "Responsive design",
-      ],
-      animation: "slide-in-up",
-    },
-    {
-      icon: (
-        <svg
-          className="w-8 h-8 text-purple-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"
-          ></path>
-        </svg>
-      ),
-      title: "Sistemas Backend",
-      description:
-        "APIs y sistemas backend seguros y eficientes para gestionar toda la lógica de negocio de tu aplicación.",
-      features: [
-        "Node.js, Python, .NET",
-        "Bases de datos optimizadas",
-        "Seguridad avanzada",
-      ],
-      animation: "slide-in-right",
-    },
-    {
-      icon: (
-        <svg
-          className="w-8 h-8 text-cyan-300"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M3 7l9-4 9 4v6c0 5-4 9-9 9s-9-4-9-9V7z"
-          ></path>
-        </svg>
-      ),
-      title: "Apps Multiplataforma",
-      description:
-        "Desarrollamos aplicaciones que funcionan sin problemas en cualquier dispositivo, con un diseño responsivo y una experiencia coherente entre plataformas.",
-      features: [
-        "Tecnologías híbridas modernas",
-        "Optimización de rendimiento móvil y web",
-        "Interfaz adaptable a pantallas",
-      ],
-      animation: "slide-in-up",
-    },
-    {
-      icon: (
-        <svg
-          className="w-8 h-8 text-indigo-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M12 4v16m8-8H4"
-          ></path>
-        </svg>
-      ),
-      title: "Diseño UX/UI",
-      description:
-        "Creamos experiencias visuales elegantes y funcionales, centradas en el usuario y alineadas con la identidad de tu marca.",
-      features: [
-        "Prototipos interactivos",
-        "Diseños modernos y minimalistas",
-        "Flujos de navegación intuitivos",
-      ],
-      animation: "slide-in-left",
-    },
-    {
-      icon: (
-        <svg
-          className="w-8 h-8 text-blue-300"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M13 10V3L4 14h7v7l9-11h-7z"
-          ></path>
-        </svg>
-      ),
-      title: "Consultoría Tecnológica",
-      description:
-        "Te acompañamos en todo el proceso de transformación digital, desde la idea hasta la implementación final del producto.",
-      features: [
-        "Análisis de requerimientos",
-        "Estrategia tecnológica",
-        "Soporte y mantenimiento continuo",
-      ],
-      animation: "slide-in-right",
-    },
-  ];
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  const { containerRef, activeIndex, next, prev, goTo, isPlaying, togglePlay, reducedMotion } = useCoverflow(services.length, 2, { gapMult: cardGapMultFor(isMobile) });
 
   return (
-    <section id="servicios" className="py-20 futuristic-bg relative">
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="text-center mb-16 slide-in-down">
-          <h2 className="text-4xl font-bold text-white mb-4 glow-text">
+    <section id="servicios" className="relative overflow-hidden py-28 px-6 lg:px-20" style={{ scrollMarginTop: 80 }}>
+      <SectionBackdrop variant="carousel" vignette={1} />
+      <AmbientParticles count={16} seed={2000} />
+      <div className="relative max-w-6xl mx-auto">
+        <div className="text-center mb-14" data-reveal>
+          <h2 className="text-4xl font-extrabold text-white mb-3" style={{ textShadow: "0 0 28px rgba(0,255,255,0.35)" }}>
             Nuestros Servicios
           </h2>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Ofrecemos soluciones completas y personalizadas para potenciar tu
-            presencia digital y optimizar tus procesos de negocio.
+          <p className="text-gray-400 max-w-xl mx-auto text-lg">
+            Soluciones de software a medida, pensadas para escalar con tu negocio.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 perspective-container">
-          {services.map((service, index) => (
-            <div
-              key={index}
-              className={`glass-panel panel-3d p-8 rounded-xl ${service.animation}`}
+        <div className="relative">
+          <div className="ds-carousel-halo" aria-hidden="true" />
+
+          <div
+            ref={containerRef}
+            role="region"
+            aria-roledescription="carousel"
+            aria-label="Nuestros servicios"
+            tabIndex={0}
+            className="relative outline-none touch-pan-y select-none"
+            style={{ height: cardTrackHeightFor(isMobile), perspective: 1000, transformStyle: "preserve-3d", cursor: "grab" }}
+          >
+            {services.map((s, i) => {
+              const faceStyle = { aspectRatio: CARD_ASPECT_RATIO, padding: CARD_PADDING };
+              // Contenido duplicado tal cual en el reflejo (ver GlassReflection):
+              // mismo ícono/título/texto/features, para vender que la
+              // tarjeta está apoyada sobre el piso de grilla.
+              const cardContent = (
+                <>
+                  <div
+                    className="w-[54px] h-[54px] rounded-2xl flex items-center justify-center mb-5"
+                    style={{ background: "rgba(56,189,248,0.1)", border: "1px solid rgba(56,189,248,0.35)", color: "#38BDF8", boxShadow: "0 0 18px rgba(56,189,248,0.18)" }}
+                  >
+                    <s.Icon className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2.5 tracking-wide">{s.title}</h3>
+                  <p className="text-[13.5px] leading-relaxed mb-4" style={{ color: "#94A3B8" }}>{s.desc}</p>
+                  <div className="mb-4">
+                    <span
+                      className="block text-[11px] font-semibold uppercase mb-2"
+                      style={{ color: "#38BDF8", opacity: 0.7, letterSpacing: "0.15em" }}
+                    >
+                      {s.techLabel}
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {s.tech.map((t, idx) => (
+                        <span
+                          key={idx}
+                          className="text-[12px] px-2.5 py-1 rounded-full"
+                          style={{ color: "#38BDF8", background: "rgba(56,189,248,0.08)", border: "1px solid rgba(56,189,248,0.25)" }}
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <ul className="mt-auto flex flex-col gap-2.5 list-none p-0 m-0">
+                    {s.features.map((f, idx) => (
+                      <li key={idx} className="flex items-center gap-2.5 text-[13px]" style={{ color: "#d1d5db" }}>
+                        <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: "#38BDF8", boxShadow: "0 0 8px rgba(56,189,248,0.8)" }} />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              );
+              return (
+                <div
+                  key={i}
+                  data-cf-card
+                  role="group"
+                  aria-roledescription="slide"
+                  aria-label={`${s.title}, ${i + 1} de ${services.length}`}
+                  className="absolute left-1/2 top-1/2"
+                  style={{ width: cardWidthFor(isMobile), willChange: "transform, opacity" }}
+                >
+                  <div className="ds-cf-inner">
+                    <div
+                      className="ds-glass-face flex flex-col box-border"
+                      style={faceStyle}
+                    >
+                      {cardContent}
+                      <div data-cf-shine className="ds-cf-shine" />
+                      <div data-cf-glare className="absolute inset-0 opacity-0 transition-opacity duration-300" style={{ mixBlendMode: "overlay" }} />
+                    </div>
+                    <GlassFloor variant="full" />
+                    <GlassReflection variant="full" sizeStyle={faceStyle}>
+                      <div className="flex flex-col box-border w-full h-full">{cardContent}</div>
+                    </GlassReflection>
+                    <GlassContactLight variant="full" />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="relative z-10 flex items-center justify-center gap-[18px] mt-16">
+            <button
+              onClick={prev}
+              aria-label="Anterior"
+              className="w-11 h-11 rounded-full border text-white flex items-center justify-center shrink-0 transition-all"
+              style={{ borderColor: "rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.05)" }}
             >
-              <div className="w-16 h-16 glass-panel rounded-lg flex items-center justify-center mb-6 neon-border">
-                {service.icon}
-              </div>
-              <h3 className="text-xl font-bold text-white mb-4 glow-text">
-                {service.title}
-              </h3>
-              <p className="text-gray-300 mb-6">{service.description}</p>
-              <ul className="text-sm text-gray-400 space-y-2">
-                {service.features.map((feature, idx) => (
-                  <li key={idx}>• {feature}</li>
-                ))}
-              </ul>
+              <ChevronLeft className="w-[18px] h-[18px]" />
+            </button>
+            <div className="flex items-center gap-2.5">
+              {services.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => goTo(i)}
+                  aria-label={`Ir a tarjeta ${i + 1} de ${services.length}`}
+                  className="h-2 rounded-full border-none cursor-pointer p-0 transition-all"
+                  style={{
+                    width: activeIndex === i ? 26 : 8,
+                    background: activeIndex === i ? "#3B82F6" : "rgba(255,255,255,0.35)",
+                    boxShadow: activeIndex === i ? "0 0 12px rgba(59,130,246,0.9)" : "none",
+                  }}
+                />
+              ))}
             </div>
-          ))}
+            <button
+              onClick={next}
+              aria-label="Siguiente"
+              className="w-11 h-11 rounded-full border text-white flex items-center justify-center shrink-0 transition-all"
+              style={{ borderColor: "rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.05)" }}
+            >
+              <ChevronRight className="w-[18px] h-[18px]" />
+            </button>
+            {!reducedMotion && (
+              <button
+                onClick={togglePlay}
+                aria-label={isPlaying ? "Pausar rotación automática" : "Reanudar rotación automática"}
+                className="w-9 h-9 rounded-full border text-white flex items-center justify-center shrink-0 transition-all ml-1"
+                style={{ borderColor: "rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.05)" }}
+              >
+                {isPlaying ? <Pause className="w-[15px] h-[15px]" /> : <Play className="w-[15px] h-[15px]" />}
+              </button>
+            )}
+          </div>
         </div>
       </div>
-
-      {/* Figuras decorativas flotantes */}
-      <div className="absolute top-10 right-20 w-32 h-32 border border-blue-500/20 rotate-12 floating-element"></div>
-      <div
-        className="absolute bottom-10 left-20 w-24 h-24 border border-purple-500/20 rotate-45 floating-element"
-        style={{ animationDelay: "-3s" }}
-      ></div>
     </section>
   );
 };

@@ -1,185 +1,175 @@
-import React, { useState } from "react";
-import {
-  Mail,
-  User,
-  MessageSquare,
-  MapPin,
-  Phone,
-  Clock,
-} from "lucide-react";
+import React, { useRef, useState } from "react";
+import { MapPin, Phone, Clock, Mail, MessageCircle } from "lucide-react";
+import AmbientParticles from "./AmbientParticles";
+import SectionBackdrop from "./SectionBackdrop";
+import { GlassReflection, GlassContactLight, GlassFloor } from "./GlassCard";
+import { WHATSAPP_NUMBER, buildWhatsAppHref } from "./whatsappConfig";
+import useParticleHover from "./particles/useParticleHover";
+
+const CONTACT_EMAIL = "techresolutions24@gmail.com";
+
+// --edge en reposo bajo, igual que ProcessSection: son dos paneles "pares",
+// ninguno debe verse como la tarjeta activa de un carrusel.
+const REST_EDGE = 0.4;
+// textAlign:"left" es necesario acá: .App (boilerplate de CRA) setea
+// text-align:center global, y nada más lo pisaba dentro de estos paneles.
+const PANEL_STYLE = { padding: 32, height: "100%", textAlign: "left" };
+
+const CONTACT_ITEMS = [
+  {
+    Icon: MapPin,
+    label: "Dirección",
+    value: "Lima 438, Córdoba, Argentina",
+    href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("Lima 438, Córdoba, Argentina")}`,
+    external: true,
+  },
+  { Icon: Phone, label: "Teléfono", value: "+54 9 351 632-5887", href: `tel:+${WHATSAPP_NUMBER}` },
+  { Icon: Mail, label: "Email", value: CONTACT_EMAIL, href: `mailto:${CONTACT_EMAIL}` },
+  { Icon: Clock, label: "Horario", value: "Lunes a Viernes, 9:00 a 18:00 hs", href: null },
+];
 
 const ContactSection = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
+  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+  const [errors, setErrors] = useState({});
+  const submitBtnRef = useRef(null);
+  useParticleHover(submitBtnRef, { variant: "button" });
 
-  // 📩 Manejar el envío del formulario
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    // Construir el mensaje de WhatsApp
-    const { name, email, message } = formData;
-    const whatsappNumber = "5493516325887"; // ← tu número en formato internacional sin "+"
-    const text = `Hola! 👋 Soy ${name}%0A📧 Email: ${email}%0A💬 Mensaje: ${message}`;
-
-    // Abrir WhatsApp
-    window.open(`https://wa.me/${whatsappNumber}?text=${text}`, "_blank");
-  };
-
-  // Manejar los cambios en los inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: undefined }));
+  };
+
+  const validate = () => {
+    const next = {};
+    if (!formData.name.trim()) next.name = "Falta tu nombre.";
+    if (!formData.email.trim()) next.email = "Falta tu email.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) next.email = "Ese email no parece válido.";
+    if (!formData.message.trim()) next.message = "Contanos brevemente qué necesitás.";
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  const handleSubmit = () => {
+    if (!validate()) return;
+    const { name, email, message } = formData;
+    const text = `¡Hola! Soy ${name} (${email}). ${message}`;
+    window.open(buildWhatsAppHref(text), "_blank");
   };
 
   return (
-    <section
-      id="contacto"
-      className="py-20 futuristic-bg relative overflow-hidden"
-    >
-      <div className="container mx-auto px-6 relative z-10">
-        {/* === TÍTULO === */}
-        <div className="text-center mb-16 slide-in-down">
-          <h2 className="text-4xl font-bold text-white mb-4 glow-text">
-            Contacto
+    <section id="contacto" className="relative overflow-hidden py-28 px-6" style={{ scrollMarginTop: 80 }}>
+      <SectionBackdrop variant="panel" vignette={0.95} />
+      <AmbientParticles count={14} seed={5000} />
+      <div className="relative max-w-5xl mx-auto">
+        <div className="text-center mb-14" data-reveal>
+          <h2 className="text-4xl font-extrabold text-white mb-3" style={{ textShadow: "0 0 28px rgba(0,255,255,0.35)" }}>
+            Hablemos de tu proyecto
           </h2>
-          <p className="text-xl text-gray-300">
-            ¿Listo para comenzar tu proyecto con nosotros?
-          </p>
-          <p className="text-gray-400 mt-2">
-            Contanos tu idea y te responderemos con una propuesta personalizada.
-          </p>
+          <p className="text-gray-400 text-lg">Contanos qué necesitás y te respondemos en el día.</p>
         </div>
 
-        {/* === CONTENEDOR PRINCIPAL === */}
-        <div className="grid md:grid-cols-2 gap-10 max-w-5xl mx-auto">
-          {/* === FORMULARIO === */}
-          <div
-            className="relative glass-panel p-10 rounded-2xl border border-white/10 
-            bg-gradient-to-br from-[#0a0a0a]/80 to-[#1a1a2e]/80 backdrop-blur-md 
-            shadow-[0_0_30px_rgba(255,255,255,0.1)] group overflow-hidden"
-          >
-            {/* Reflejo animado */}
-            <div className="absolute inset-0 pointer-events-none before:content-[''] before:absolute before:top-0 before:left-[-75%] before:w-[50%] before:h-full before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent before:rotate-12 group-hover:before:animate-shine"></div>
-
-            <form
-              onSubmit={handleSubmit}
-              className="space-y-6 relative z-10"
-            >
-              <div className="relative">
-                <User className="absolute left-4 top-3 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Tu nombre"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full bg-white/5 border border-white/10 rounded-lg py-3 pl-12 pr-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all"
-                />
+        <div className="grid gap-[22px] items-stretch" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))" }}>
+          {/* Formulario */}
+          <div data-reveal>
+            <div className="ds-cf-inner ds-static-glass" style={{ "--edge": REST_EDGE, height: "100%" }}>
+              <div className="ds-glass-face" style={PANEL_STYLE}>
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <label htmlFor="contact-name" className="ds-input-label">Nombre</label>
+                    <input
+                      id="contact-name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="Tu nombre"
+                      className={`ds-input${errors.name ? " ds-input--error" : ""}`}
+                      aria-invalid={!!errors.name}
+                      aria-describedby={errors.name ? "contact-name-error" : undefined}
+                    />
+                    {errors.name && <p id="contact-name-error" className="ds-input-error">{errors.name}</p>}
+                  </div>
+                  <div>
+                    <label htmlFor="contact-email" className="ds-input-label">Email</label>
+                    <input
+                      id="contact-email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Tu email"
+                      className={`ds-input${errors.email ? " ds-input--error" : ""}`}
+                      aria-invalid={!!errors.email}
+                      aria-describedby={errors.email ? "contact-email-error" : undefined}
+                    />
+                    {errors.email && <p id="contact-email-error" className="ds-input-error">{errors.email}</p>}
+                  </div>
+                  <div>
+                    <label htmlFor="contact-message" className="ds-input-label">Mensaje</label>
+                    <textarea
+                      id="contact-message"
+                      name="message"
+                      rows={5}
+                      value={formData.message}
+                      onChange={handleChange}
+                      placeholder="Contanos sobre tu proyecto..."
+                      className={`ds-input resize-y${errors.message ? " ds-input--error" : ""}`}
+                      aria-invalid={!!errors.message}
+                      aria-describedby={errors.message ? "contact-message-error" : undefined}
+                    />
+                    {errors.message && <p id="contact-message-error" className="ds-input-error">{errors.message}</p>}
+                  </div>
+                  <button ref={submitBtnRef} type="button" onClick={handleSubmit} className="ds-wa-btn">
+                    <MessageCircle className="w-[18px] h-[18px]" />
+                    Enviar por WhatsApp
+                  </button>
+                </div>
               </div>
-
-              <div className="relative">
-                <Mail className="absolute left-4 top-3 text-gray-400 w-5 h-5" />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Tu correo electrónico"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full bg-white/5 border border-white/10 rounded-lg py-3 pl-12 pr-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all"
-                />
-              </div>
-
-              <div className="relative">
-                <MessageSquare className="absolute left-4 top-3 text-gray-400 w-5 h-5" />
-                <textarea
-                  name="message"
-                  rows="4"
-                  placeholder="Tu mensaje"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  className="w-full bg-white/5 border border-white/10 rounded-lg py-3 pl-12 pr-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all resize-none"
-                ></textarea>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-3 rounded-lg font-semibold text-lg text-white 
-                bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-blue-600 hover:to-cyan-500 
-                transition-all duration-300 shadow-[0_0_15px_rgba(0,255,255,0.3)] hover:shadow-[0_0_25px_rgba(0,255,255,0.5)]"
-              >
-                Enviar por WhatsApp
-              </button>
-            </form>
+              <GlassFloor variant="full" />
+              <GlassReflection variant="grid" sizeStyle={PANEL_STYLE} />
+              <GlassContactLight variant="full" />
+            </div>
           </div>
 
-          {/* === INFORMACIÓN DE CONTACTO + MAPA === */}
-          <div
-            className="glass-panel p-10 rounded-2xl border border-white/10
-            bg-white/5 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.1)] flex flex-col justify-between"
-          >
-            <div>
-              <h3 className="text-2xl font-semibold text-white mb-6">
-                Información de contacto
-              </h3>
-              <div className="space-y-4 text-gray-300">
-                <div className="flex items-start gap-3">
-                  <MapPin className="w-6 h-6 text-cyan-400 mt-1" />
-                  <p>Lima 438, Córdoba, Argentina</p>
-                </div>
+          {/* Panel de contacto directo */}
+          <div data-reveal data-delay="150">
+            <div className="ds-cf-inner ds-static-glass" style={{ "--edge": REST_EDGE, height: "100%" }}>
+              <div className="ds-glass-face flex flex-col" style={PANEL_STYLE}>
+                <h3 className="text-xl font-bold text-white mb-6">Contacto directo</h3>
 
-                <div className="flex items-center gap-3">
-                  <Phone className="w-6 h-6 text-cyan-400" />
-                  <p>+54 9 351 632-5887</p>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Mail className="w-6 h-6 text-cyan-400" />
-                  <p>techsolution@gmail.com</p>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Clock className="w-6 h-6 text-cyan-400" />
-                  <p>Lunes a Viernes – 9:00 a 18:00 hs</p>
+                {/* gap-6 = separación mínima (24px); justify-between reparte
+                    el resto del alto del panel de forma pareja entre los 4
+                    items, sin huecos sueltos. */}
+                <div className="flex-1 flex flex-col justify-between gap-6">
+                  {CONTACT_ITEMS.map(({ Icon, label, value, href, external }, idx) => {
+                    const Tag = href ? "a" : "div";
+                    const tagProps = href ? { href, ...(external ? { target: "_blank", rel: "noopener noreferrer" } : {}) } : {};
+                    return (
+                      <Tag key={idx} {...tagProps} className="ds-contact-row flex items-center gap-4 no-underline">
+                        <span
+                          className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+                          style={{ background: "rgba(56,189,248,0.1)", border: "1px solid rgba(56,189,248,0.3)", color: "#38BDF8" }}
+                        >
+                          <Icon className="w-5 h-5" />
+                        </span>
+                        <div>
+                          <div className="text-[14px] font-semibold text-white">{label}</div>
+                          <div className="ds-contact-value text-sm mt-0.5" style={{ color: href ? "#38BDF8" : "#94A3B8" }}>
+                            {value}
+                          </div>
+                        </div>
+                      </Tag>
+                    );
+                  })}
                 </div>
               </div>
-            </div>
-
-            {/* === MAPA === */}
-            <div className="mt-8 rounded-xl overflow-hidden border border-white/10 shadow-[0_0_15px_rgba(0,255,255,0.1)]">
-              <iframe
-                title="Mapa Soul Tech"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13747.86816707953!2d-64.19521355975393!3d-31.41733923846899!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9432a28e7b7a3f3f%3A0x6a8d0277c2e2f3ef!2sC%C3%B3rdoba%2C%20Argentina!5e0!3m2!1ses-419!2sar!4v1706900000000!5m2!1ses-419!2sar"
-                width="100%"
-                height="220"
-                style={{ border: 0 }}
-                allowFullScreen=""
-                loading="lazy"
-                className="rounded-lg"
-              ></iframe>
+              <GlassFloor variant="full" />
+              <GlassReflection variant="grid" sizeStyle={PANEL_STYLE} />
+              <GlassContactLight variant="full" />
             </div>
           </div>
         </div>
       </div>
-
-      {/* EFECTO BRILLO */}
-      <style>
-        {`
-          @keyframes shine {
-            0% { transform: translateX(0); opacity: 0; }
-            50% { opacity: 0.5; }
-            100% { transform: translateX(200%); opacity: 0; }
-          }
-          .animate-shine {
-            animation: shine 2.5s linear infinite;
-          }
-        `}
-      </style>
     </section>
   );
 };
