@@ -4,7 +4,7 @@ import useCoverflow from "./useCoverflow";
 import AmbientParticles from "./AmbientParticles";
 import SectionBackdrop from "./SectionBackdrop";
 import { GlassReflection, GlassContactLight, GlassFloor } from "./GlassCard";
-import { CARD_ASPECT_RATIO, CARD_PADDING, cardWidthFor, cardGapMultFor, cardTrackHeightFor } from "./cardTokens";
+import { CARD_PADDING, cardWidthFor, cardAspectRatioFor, cardGapMultFor, cardTrackHeightFor } from "./cardTokens";
 
 const services = [
   {
@@ -75,12 +75,12 @@ const ServicesSection = () => {
     return () => mq.removeEventListener("change", update);
   }, []);
 
-  const { containerRef, activeIndex, next, prev, goTo, isPlaying, togglePlay, reducedMotion } = useCoverflow(services.length, 2, { gapMult: cardGapMultFor(isMobile) });
+  const { containerRef, activeIndex, next, prev, goTo, isPlaying, togglePlay, reducedMotion } = useCoverflow(services.length, 2, { gapMult: cardGapMultFor(isMobile), isMobile });
 
   return (
     <section id="servicios" className="relative overflow-hidden py-28 px-6 lg:px-20" style={{ scrollMarginTop: 80 }}>
       <SectionBackdrop variant="carousel" vignette={1} />
-      <AmbientParticles count={16} seed={2000} />
+      <AmbientParticles count={isMobile ? 7 : 16} seed={2000} />
       <div className="relative max-w-6xl mx-auto">
         <div className="text-center mb-14" data-reveal>
           <h2 className="text-4xl font-extrabold text-white mb-3" style={{ textShadow: "0 0 28px rgba(0,255,255,0.35)" }}>
@@ -101,10 +101,10 @@ const ServicesSection = () => {
             aria-label="Nuestros servicios"
             tabIndex={0}
             className="relative outline-none touch-pan-y select-none"
-            style={{ height: cardTrackHeightFor(isMobile), perspective: 1000, transformStyle: "preserve-3d", cursor: "grab" }}
+            style={{ height: cardTrackHeightFor(isMobile), perspective: isMobile ? 1400 : 1000, transformStyle: "preserve-3d", cursor: "grab" }}
           >
             {services.map((s, i) => {
-              const faceStyle = { aspectRatio: CARD_ASPECT_RATIO, padding: CARD_PADDING };
+              const faceStyle = { aspectRatio: cardAspectRatioFor(isMobile), padding: CARD_PADDING };
               // Contenido duplicado tal cual en el reflejo (ver GlassReflection):
               // mismo ícono/título/texto/features, para vender que la
               // tarjeta está apoyada sobre el piso de grilla.

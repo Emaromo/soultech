@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { MapPin, Phone, Clock, Mail, MessageCircle } from "lucide-react";
 import AmbientParticles from "./AmbientParticles";
 import SectionBackdrop from "./SectionBackdrop";
@@ -31,8 +31,17 @@ const CONTACT_ITEMS = [
 const ContactSection = () => {
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const [errors, setErrors] = useState({});
+  const [isMobile, setIsMobile] = useState(false);
   const submitBtnRef = useRef(null);
   useParticleHover(submitBtnRef, { variant: "button" });
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,7 +69,7 @@ const ContactSection = () => {
   return (
     <section id="contacto" className="relative overflow-hidden py-28 px-6" style={{ scrollMarginTop: 80 }}>
       <SectionBackdrop variant="panel" vignette={0.95} />
-      <AmbientParticles count={14} seed={5000} />
+      <AmbientParticles count={isMobile ? 6 : 14} seed={5000} />
       <div className="relative max-w-5xl mx-auto">
         <div className="text-center mb-14" data-reveal>
           <h2 className="text-4xl font-extrabold text-white mb-3" style={{ textShadow: "0 0 28px rgba(0,255,255,0.35)" }}>

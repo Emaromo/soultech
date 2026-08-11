@@ -77,7 +77,7 @@ const HeroSection = () => {
           href="https://wa.me/5493516325887?text=%C2%A1Hola!%20Quiero%20agendar%20una%20consulta"
           target="_blank"
           rel="noopener noreferrer"
-          className="ds-liquid-glass relative inline-flex items-center justify-center mt-6 px-[29px] py-6 rounded-full text-[#f2f1ee] text-[15px] font-semibold leading-none no-underline"
+          className="ds-liquid-glass hero-cta relative inline-flex items-center justify-center mt-6 px-[29px] py-6 rounded-full text-[#f2f1ee] text-[15px] font-semibold leading-none no-underline"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.35 }}

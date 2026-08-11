@@ -16,6 +16,11 @@ const WHATSAPP_QUOTE_URL = "https://wa.me/5493516325887?text=%C2%A1Hola!%20Quier
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  // Breakpoint aparte del isMobile de arriba (860px, colapso a hamburguesa):
+  // el logo/wordmark sólo necesitan achicarse en teléfonos angostos de
+  // verdad (probado 360-420px); entre 640-860px (tablets) el tamaño de
+  // desktop entra perfecto igual.
+  const [isSmallPhone, setIsSmallPhone] = useState(false);
   const ctaRef = useRef(null);
   useParticleHover(ctaRef, { variant: "button" });
 
@@ -24,6 +29,14 @@ const Header = () => {
     checkWidth();
     window.addEventListener("resize", checkWidth);
     return () => window.removeEventListener("resize", checkWidth);
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const update = () => setIsSmallPhone(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
   }, []);
 
   return (
@@ -39,14 +52,17 @@ const Header = () => {
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <a href="/" className="soultech-logo-link flex items-center no-underline" aria-label="Soul Tech - Inicio">
-            <SoulTechLogo size={55} />
-            {!isMobile && (
-              <img
-                src="letras.png"
-                alt="Soul Tech"
-                className="soultech-wordmark-img"
-              />
-            )}
+            <SoulTechLogo size={isSmallPhone ? 38 : 55} />
+            {/* Antes se ocultaba entero en móvil (<860px) — el logo es la
+                marca, es lo último que debería desaparecer. Ahora se ve
+                siempre; en teléfonos angostos de verdad (isSmallPhone) se
+                achican escudo y wordmark juntos y proporcionalmente en vez
+                de sacar uno de los dos (ver .soultech-wordmark-img--sm). */}
+            <img
+              src="letras.png"
+              alt="Soul Tech"
+              className={`soultech-wordmark-img${isSmallPhone ? " soultech-wordmark-img--sm" : ""}`}
+            />
           </a>
 
           {!isMobile && (
@@ -72,10 +88,15 @@ const Header = () => {
           )}
 
           {isMobile && (
-            <button onClick={() => setMenuOpen(!menuOpen)} aria-label="Menú" className="relative z-[60] flex flex-col gap-[5px] p-2 bg-transparent border-none cursor-pointer">
-              <motion.span className="block w-6 h-0.5 bg-cyan-400" animate={{ rotate: menuOpen ? 45 : 0, y: menuOpen ? 6 : 0 }} transition={{ duration: 0.3 }} />
-              <motion.span className="block w-6 h-0.5 bg-cyan-400" animate={{ opacity: menuOpen ? 0 : 1 }} transition={{ duration: 0.3 }} />
-              <motion.span className="block w-6 h-0.5 bg-cyan-400" animate={{ rotate: menuOpen ? -45 : 0, y: menuOpen ? -6 : 0 }} transition={{ duration: 0.3 }} />
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="Menú"
+              aria-expanded={menuOpen}
+              className="ds-hamburger-btn relative z-[60] w-11 h-11 flex flex-col items-center justify-center gap-[5px] shrink-0 rounded-xl cursor-pointer"
+            >
+              <motion.span className="block w-5 h-0.5 rounded-full bg-cyan-400" animate={{ rotate: menuOpen ? 45 : 0, y: menuOpen ? 6 : 0 }} transition={{ duration: 0.3 }} />
+              <motion.span className="block w-5 h-0.5 rounded-full bg-cyan-400" animate={{ opacity: menuOpen ? 0 : 1 }} transition={{ duration: 0.3 }} />
+              <motion.span className="block w-5 h-0.5 rounded-full bg-cyan-400" animate={{ rotate: menuOpen ? -45 : 0, y: menuOpen ? -6 : 0 }} transition={{ duration: 0.3 }} />
             </button>
           )}
         </motion.nav>

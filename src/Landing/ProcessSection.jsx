@@ -105,6 +105,7 @@ const StepCard = ({ step, index, circleRef, onSettled }) => {
 const ProcessSection = () => {
   const [isDesktop, setIsDesktop] = useState(true);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   // Línea medida en píxeles reales (no %), tomada del centro de los círculos
   // 1 y 4 vía getBoundingClientRect. Esto la ancla de forma exacta sin
   // depender de asumir el ancho de columnas del grid (ver nota de la v.
@@ -118,16 +119,20 @@ const ProcessSection = () => {
   useEffect(() => {
     const mqDesktop = window.matchMedia("(min-width: 860px)");
     const mqReduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const mqMobile = window.matchMedia("(max-width: 640px)");
     const update = () => {
       setIsDesktop(mqDesktop.matches);
       setReducedMotion(mqReduced.matches);
+      setIsMobile(mqMobile.matches);
     };
     update();
     mqDesktop.addEventListener("change", update);
     mqReduced.addEventListener("change", update);
+    mqMobile.addEventListener("change", update);
     return () => {
       mqDesktop.removeEventListener("change", update);
       mqReduced.removeEventListener("change", update);
+      mqMobile.removeEventListener("change", update);
     };
   }, []);
 
@@ -201,7 +206,7 @@ const ProcessSection = () => {
   return (
     <section id="procesos" className="relative overflow-hidden py-28 px-6" style={{ scrollMarginTop: 80 }}>
       <SectionBackdrop variant="grid" vignette={1} />
-      <AmbientParticles count={14} seed={4000} />
+      <AmbientParticles count={isMobile ? 6 : 14} seed={4000} />
       <div className="relative max-w-6xl mx-auto">
         <div className="text-center mb-16" data-reveal>
           <h2 className="text-4xl font-extrabold text-white mb-3" style={{ textShadow: "0 0 28px rgba(0,255,255,0.35)" }}>

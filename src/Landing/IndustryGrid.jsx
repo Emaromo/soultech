@@ -13,7 +13,7 @@ import {
   UtensilsCrossed,
 } from "lucide-react";
 import { GlassReflection, GlassContactLight, GlassFloor } from "./GlassCard";
-import { CARD_ASPECT_RATIO, CARD_PADDING, cardWidthFor, cardGapMultFor, cardTrackHeightFor } from "./cardTokens";
+import { CARD_PADDING, cardWidthFor, cardAspectRatioFor, cardGapMultFor, cardTrackHeightFor } from "./cardTokens";
 import { buildWhatsAppHref } from "./whatsappConfig";
 import { emitBurst } from "./particles/particleEngine";
 
@@ -225,8 +225,10 @@ export default function IndustryGrid({
     const shineEls = cards.map((c) => c.querySelector('[data-cf-shine]'));
 
     const rm = reducedMotion;
-    const particlesOk = window.matchMedia('(hover: hover) and (pointer: fine)').matches
-      && !rm && (navigator.hardwareConcurrency || 8) > 4;
+    // hover:hover + pointer:fine = mouse/trackpad real, nunca táctil. Gatea
+    // tilt+glare+partículas por igual (ver mismo patrón en useCoverflow.js).
+    const hoverCapable = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const particlesOk = hoverCapable && !rm && (navigator.hardwareConcurrency || 8) > 4;
     const eng = {
       pos: initial, target: initial, vel: 0, raf: 0, lastFrameAt: 0,
       dragging: false, moved: false, tiltCard: -1, tiltX: 0, tiltY: 0,
@@ -272,14 +274,24 @@ export default function IndustryGrid({
         const d = loop ? wrapDelta(i - eng.pos, N) : (i - eng.pos);
         const ad = Math.abs(d);
         const tilt = i === eng.tiltCard;
-        const rotY = Math.max(-40, Math.min(40, -d * 34)) + (tilt ? eng.tiltY : 0);
+        // Sólo en móvil: menos rotación y menos translateZ que en desktop —
+        // la perspectiva agresiva de desktop (rotY hasta 40°, z hasta -380
+        // por unidad de distancia) empuja a las laterales fuera del cuadro
+        // en una pantalla angosta. Desktop queda intacto.
+        const rotYMax = isMobile ? 16 : 40;
+        const rotYMult = isMobile ? 13 : 34;
+        const zMult = isMobile ? -150 : -380;
+        const rotY = Math.max(-rotYMax, Math.min(rotYMax, -d * rotYMult)) + (tilt ? eng.tiltY : 0);
         const rotX = tilt ? eng.tiltX : 0;
         // Más translateZ negativo que un coverflow estándar: separa mucho
         // las laterales en profundidad para que dejen de pisar a la central.
-        const z = -ad * 380 + (tilt ? 40 : 0);
+        const z = ad * zMult + (tilt ? 40 : 0);
         const sc = Math.max(0.6, 1 - ad * 0.18);
-        // Blur progresivo: nítido en el centro, 3px adyacentes, 6px lejanas.
-        const blurPx = Math.min(6, ad * 3);
+        // Blur progresivo: nítido en el centro, más en las laterales; tope
+        // 6px en desktop, 2px en móvil (ver misma nota en useCoverflow.js).
+        const blurCap = isMobile ? 2 : 6;
+        const blurPerAd = isMobile ? 1.2 : 3;
+        const blurPx = Math.min(blurCap, ad * blurPerAd);
         const edge = Math.max(0, 1 - ad);
         const el = cards[i];
         el.style.transform = `translate(-50%,-50%) translateX(${(d * g).toFixed(1)}px) translateZ(${z.toFixed(1)}px) rotateY(${rotY.toFixed(2)}deg) rotateX(${rotX.toFixed(2)}deg) scale(${sc.toFixed(3)})`;
@@ -288,6 +300,10 @@ export default function IndustryGrid({
         el.style.zIndex = String(200 - Math.round(ad * 15));
         el.style.pointerEvents = ad > 1.1 ? "none" : "auto";
         el.style.visibility = ad >= 3 ? "hidden" : "visible";
+        // Sólo en móvil: display:none (no sólo visibility:hidden) para lo
+        // que no sea central + 2 adyacentes (ver misma nota en useCoverflow.js
+        // sobre por qué esta asignación es incondicional, no "if (isMobile)").
+        el.style.display = (isMobile && ad >= 1.5) ? "none" : "";
         el.setAttribute("aria-hidden", ad < 0.5 ? "false" : "true");
         el.style.setProperty("--edge", edge.toFixed(3));
         const card = cardInnerEls[i];
@@ -407,7 +423,7 @@ export default function IndustryGrid({
         lastX = e.clientX; lastT = now;
         eng.tiltCard = -1;
         render();
-      } else if (!rm) {
+      } else if (!rm && hoverCapable) {
         const ci = wrapIdx(eng.pos);
         const c = cards[ci];
         if (!c) return;
@@ -568,11 +584,11 @@ export default function IndustryGrid({
           aria-label={title}
           tabIndex={0}
           className="ind-track relative outline-none touch-pan-y select-none"
-          style={{ height: cardTrackHeightFor(isMobile), perspective: 1000, transformStyle: "preserve-3d", cursor: "grab" }}
+          style={{ height: cardTrackHeightFor(isMobile), perspective: isMobile ? 1400 : 1000, transformStyle: "preserve-3d", cursor: "grab" }}
         >
           {items.map((it, i) => {
             const Icon = ICONS[it.icon];
-            const faceStyle = { padding: CARD_PADDING, aspectRatio: CARD_ASPECT_RATIO };
+            const faceStyle = { padding: CARD_PADDING, aspectRatio: cardAspectRatioFor(isMobile) };
             const waHref = buildWhatsAppHref(it.whatsappMessage);
             const cardVisual = (
               <>

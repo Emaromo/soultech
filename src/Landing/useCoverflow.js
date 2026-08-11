@@ -33,11 +33,14 @@ const wrapDelta = (a, n) => {
  *   autoplay?: boolean,
  *   autoplayDelayMs?: number,
  *   pauseOnHover?: boolean,
+ *   isMobile?: boolean,
  * }} [options] gapMult: multiplicador de separación horizontal (gap =
  *   anchoTarjeta * gapMult, default 0.8). loop: circular infinito (default
  *   true). autoplay: rotación automática (default true). autoplayDelayMs:
  *   ms por tarjeta (default 3500). pauseOnHover: pausar autoplay al pasar
- *   el mouse por el carrusel (default true).
+ *   el mouse por el carrusel (default true). isMobile: sólo atenúa
+ *   rotación/translateZ (ver render()) — el caller sigue siendo dueño del
+ *   media query, este hook no detecta nada por su cuenta (default false).
  */
 export default function useCoverflow(count, initial = 0, options = {}) {
   const {
@@ -46,6 +49,7 @@ export default function useCoverflow(count, initial = 0, options = {}) {
     autoplay = true,
     autoplayDelayMs = 3500,
     pauseOnHover = true,
+    isMobile = false,
   } = options;
 
   const [node, setNode] = useState(null);
@@ -81,11 +85,16 @@ export default function useCoverflow(count, initial = 0, options = {}) {
     const shineEls = cards.map((c) => c.querySelector('[data-cf-shine]'));
 
     const rm = reducedMotion;
+    // hover:hover + pointer:fine = mouse/trackpad real, nunca táctil (en
+    // touch no existe hover de verdad y el puntero es "coarse"). Gatea
+    // tilt+glare+partículas por igual: en táctil ninguno de los tres debe
+    // ejecutarse (el pointermove "de paso sin tocar" tampoco existe en
+    // touch, pero este chequeo lo hace explícito en vez de depender de eso).
+    const hoverCapable = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     // Partículas de hover (useParticleHover.js las gatea igual, repetido acá
     // porque este motor no pasa por ese hook): solo con hover real + puntero
     // fino + CPU con margen.
-    const particlesOk = window.matchMedia('(hover: hover) and (pointer: fine)').matches
-      && !rm && (navigator.hardwareConcurrency || 8) > 4;
+    const particlesOk = hoverCapable && !rm && (navigator.hardwareConcurrency || 8) > 4;
     const eng = {
       pos: initial, target: initial, vel: 0, raf: 0, lastFrameAt: 0,
       dragging: false, moved: false, tiltCard: -1, tiltX: 0, tiltY: 0,
@@ -134,16 +143,26 @@ export default function useCoverflow(count, initial = 0, options = {}) {
         const d = loop ? wrapDelta(i - eng.pos, N) : (i - eng.pos);
         const ad = Math.abs(d);
         const tilt = i === eng.tiltCard;
-        const rotY = Math.max(-42, Math.min(42, -d * 36)) + (tilt ? eng.tiltY : 0);
+        // Sólo en móvil: menos rotación y menos translateZ — la perspectiva
+        // de desktop empuja a las laterales fuera de una pantalla angosta.
+        // Desktop queda exactamente como estaba (42°/-340 por unidad).
+        const rotYMax = isMobile ? 16 : 42;
+        const rotYMult = isMobile ? 13 : 36;
+        const zMult = isMobile ? -150 : -340;
+        const rotY = Math.max(-rotYMax, Math.min(rotYMax, -d * rotYMult)) + (tilt ? eng.tiltY : 0);
         const rotX = tilt ? eng.tiltX : 0;
         // Mucho más translateZ negativo que antes (-200→-340 por unidad de
         // distancia): separa de verdad a las laterales en profundidad para
         // que dejen de "pisar" visualmente a la tarjeta central.
-        const z = -ad * 340 + (tilt ? 40 : 0);
+        const z = ad * zMult + (tilt ? 40 : 0);
         const sc = Math.max(0.6, 1 - ad * 0.18);
-        // Blur progresivo: nítido en el centro, 3px en adyacentes (ad~1),
-        // 6px en lejanas (ad~2+).
-        const blurPx = Math.min(6, ad * 3);
+        // Blur progresivo: nítido en el centro, más en las laterales. En
+        // desktop llega a 6px (ad~2+); en móvil el tope es 2px — un blur
+        // grande sobre varias tarjetas grandes a la vez es caro en GPUs de
+        // gama media/baja.
+        const blurCap = isMobile ? 2 : 6;
+        const blurPerAd = isMobile ? 1.2 : 3;
+        const blurPx = Math.min(blurCap, ad * blurPerAd);
         const el = cards[i];
         el.style.transform = `translate(-50%,-50%) translateX(${(d * g).toFixed(1)}px) translateZ(${z.toFixed(1)}px) rotateY(${rotY.toFixed(2)}deg) rotateX(${rotX.toFixed(2)}deg) scale(${sc.toFixed(3)})`;
         el.style.opacity = String(+opacityFor(ad).toFixed(3));
@@ -154,6 +173,14 @@ export default function useCoverflow(count, initial = 0, options = {}) {
         // (no hay forma de "no montarla" desde este motor imperativo, pero
         // visibility:hidden + opacity 0 la saca por completo de pantalla).
         el.style.visibility = ad >= 3 ? 'hidden' : 'visible';
+        // Sólo en móvil: display:none (no sólo visibility:hidden) para todo
+        // lo que no sea central + 2 adyacentes — motor/browser dejan de
+        // pintar/componer esas tarjetas por completo en vez de sólo
+        // ocultarlas, que es lo caro en un carrusel con blur+3D+glass.
+        // Asignación incondicional (no "if (isMobile) ..."): si no, al pasar
+        // de móvil a desktop (resize/rotación) el 'none' de la corrida
+        // anterior queda pegado, porque esta rama nunca lo volvería a tocar.
+        el.style.display = (isMobile && ad >= 1.5) ? 'none' : '';
         el.setAttribute('aria-hidden', ad < 0.5 ? 'false' : 'true');
         // Proximidad al centro (1 = tarjeta activa, 0 = lejana): alimenta el
         // glow del borde blanco (--edge) en las tarjetas de vidrio.
@@ -276,7 +303,7 @@ export default function useCoverflow(count, initial = 0, options = {}) {
         lastX = e.clientX; lastT = now;
         eng.tiltCard = -1;
         render();
-      } else if (!rm) {
+      } else if (!rm && hoverCapable) {
         const ci = wrapIdx(eng.pos);
         const c = cards[ci];
         if (!c) return;
@@ -418,7 +445,7 @@ export default function useCoverflow(count, initial = 0, options = {}) {
       root.removeEventListener('dragstart', onDragStart);
       window.removeEventListener('resize', onResize);
     };
-  }, [node, count, initial, gapMult, loop, autoplay, autoplayDelayMs, pauseOnHover, reducedMotion]);
+  }, [node, count, initial, gapMult, loop, autoplay, autoplayDelayMs, pauseOnHover, reducedMotion, isMobile]);
 
   const next = useCallback(() => { engineRef.current?.next(); }, []);
   const prev = useCallback(() => { engineRef.current?.prev(); }, []);

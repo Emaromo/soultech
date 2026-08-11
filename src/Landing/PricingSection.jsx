@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import useCoverflow from "./useCoverflow";
 import AmbientParticles from "./AmbientParticles";
@@ -111,13 +111,32 @@ const plans = [
   },
 ];
 
+// Sólo móvil: la tarjeta central de "Nuestros planes" usa estos valores en
+// vez de los hardcodeados de desktop (560 / min(330px,76vw) / minHeight
+// 470), que quedan intocados. El contenido de esta tarjeta YA entra en
+// 470px (medido con Playwright, aspectRatio:auto no lo desborda) — el
+// espacio vacío de acá abajo era el track (560) sobrando contra la tarjeta
+// (470), no un problema de contenido cortado.
+const PLANES_CARD_WIDTH_MOBILE = "min(280px,84vw)";
+const PLANES_CARD_MIN_HEIGHT_MOBILE = 470;
+const PLANES_TRACK_HEIGHT_MOBILE = 510;
+
 const PricingSection = () => {
-  const { containerRef, activeIndex, next, prev, goTo } = useCoverflow(plans.length, 1, { loop: false, autoplay: false });
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  const { containerRef, activeIndex, next, prev, goTo } = useCoverflow(plans.length, 1, { loop: false, autoplay: false, isMobile });
 
   return (
     <section id="precios" className="relative overflow-hidden py-28 px-6" style={{ scrollMarginTop: 80 }}>
       <SectionBackdrop variant="carousel" vignette={0.95} />
-      <AmbientParticles count={16} seed={3000} />
+      <AmbientParticles count={isMobile ? 7 : 16} seed={3000} />
       <div className="relative max-w-6xl mx-auto">
         <div className="text-center mb-14" data-reveal>
           <h2 className="text-4xl font-extrabold text-white mb-3" style={{ textShadow: "0 0 28px rgba(0,255,255,0.35)" }}>
@@ -140,10 +159,15 @@ const PricingSection = () => {
             aria-label="Planes y servicios"
             tabIndex={0}
             className="relative outline-none touch-pan-y select-none"
-            style={{ height: 560, perspective: 1000, transformStyle: "preserve-3d", cursor: "grab" }}
+            style={{
+              height: isMobile ? PLANES_TRACK_HEIGHT_MOBILE : 560,
+              perspective: isMobile ? 1400 : 1000,
+              transformStyle: "preserve-3d",
+              cursor: "grab",
+            }}
           >
             {plans.map((p, i) => {
-              const faceStyle = { padding: "30px 28px", minHeight: 470 };
+              const faceStyle = { padding: "30px 28px", minHeight: isMobile ? PLANES_CARD_MIN_HEIGHT_MOBILE : 470 };
               // Mismo contenido en la cara real y en el reflejo (ver
               // GlassReflection): badge, título, precio, features y CTA.
               const cardContent = (
@@ -187,7 +211,7 @@ const PricingSection = () => {
                   aria-roledescription="slide"
                   aria-label={`${p.title}, ${i + 1} de ${plans.length}`}
                   className="absolute left-1/2 top-1/2"
-                  style={{ width: "min(330px,76vw)", willChange: "transform, opacity" }}
+                  style={{ width: isMobile ? PLANES_CARD_WIDTH_MOBILE : "min(330px,76vw)", willChange: "transform, opacity" }}
                 >
                   <div className="ds-cf-inner">
                     <div

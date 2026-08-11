@@ -501,6 +501,20 @@ a.ds-project-card:focus-visible { outline: 2px solid #38BDF8; outline-offset: 4p
   pointer-events: none;
 }
 
+/* CTA principal del Hero ("Agendá una consulta"): .ds-liquid-glass por sí
+   solo (fondo casi transparente + sólo un filo en degradé) se pierde contra
+   el video de fondo — SOLO EN MÓVIL pasa a fondo sólido con el mismo
+   gradiente azul que los botones de WhatsApp del resto del sitio, para que
+   sea inequívocamente el CTA principal. Selector combinado con
+   .ds-liquid-glass (no redefine la clase sola) para no tocar los otros
+   usos compartidos (chips del marquee) ni el desktop. */
+@media (max-width: 640px) {
+  .ds-liquid-glass.hero-cta {
+    background: linear-gradient(135deg, #06b6d4, #2563eb);
+    box-shadow: 0 0 24px rgba(0, 255, 255, 0.45);
+  }
+}
+
 /* --- Modelo "tarjeta de vidrio" (glassmorphism, borde blanco brillante,
    reflejo y materialización por partículas) usado en los carruseles 3D
    (Servicios, Precios, Rubros) y en las grillas/paneles estáticos
@@ -765,14 +779,15 @@ a.ds-project-card:focus-visible { outline: 2px solid #38BDF8; outline-offset: 4p
 }
 @media (max-width: 640px) {
   /* La tarjeta activa ocupa casi todo el ancho: pozo más chico (si no,
-     spillea parejo a los costados en vez de leerse concentrado) y blur más
-     bajo (costo de composición en gama baja). */
+     spillea parejo a los costados en vez de leerse concentrado) y blur
+     bajado a 30-40px (70-90px de desktop es carísimo de componer en GPUs
+     móviles de gama media/baja). */
   .sb-backdrop--carousel .sb-well {
     background: radial-gradient(ellipse 68% 38% at 50% 62%, rgba(37, 99, 235, 0.2) 0%, rgba(37, 99, 235, 0.07) 45%, transparent 72%);
-    filter: blur(50px);
+    filter: blur(35px);
   }
-  .sb-backdrop--grid .sb-well { filter: blur(60px); }
-  .sb-backdrop--panel .sb-well { filter: blur(60px); }
+  .sb-backdrop--grid .sb-well { filter: blur(38px); }
+  .sb-backdrop--panel .sb-well { filter: blur(32px); }
 }
 
 /* --- Logo de Soul Tech (navbar, ver SoulTechLogo.jsx) --- Escudo = PNG
@@ -862,9 +877,10 @@ a.ds-project-card:focus-visible { outline: 2px solid #38BDF8; outline-offset: 4p
    efecto cromado/glass ya resuelto en el propio asset — no se puede
    recolorear, y no hace falta, se ve premium sobre el fondo oscuro).
    Centrado verticalmente junto al escudo, con un glow blanco sutil vía
-   drop-shadow. Se oculta en mobile (ver Header.jsx, isMobile) en vez de
-   con CSS, para no seguir bajando el peso de la imagen si no se va a
-   mostrar. --- */
+   drop-shadow. Visible SIEMPRE (antes se ocultaba entero por debajo de
+   860px — el logo es la marca, no debería desaparecer en el navbar
+   móvil); en teléfonos angostos de verdad (ver Header.jsx, isSmallPhone,
+   ≤640px) se achica junto con el escudo en vez de sacarse. --- */
 .soultech-wordmark-img {
   height: 34px;
   width: auto;
@@ -878,6 +894,34 @@ a.ds-project-card:focus-visible { outline: 2px solid #38BDF8; outline-offset: 4p
      Este margen negativo descuenta ese aire "invisible" para que el
      escudo y el wordmark se lean pegados, como una sola marca. */
   margin-left: -13px;
+}
+/* Mismo achicado proporcional que SoulTechLogo size={38} en vez de 55
+   (ratio ~0.69): 34px→24px de alto, -13px→-9px de margen, así la relación
+   visual escudo/wordmark no cambia, sólo la escala conjunta. */
+.soultech-wordmark-img--sm {
+  height: 24px;
+  margin-left: -9px;
+}
+
+/* Botón hamburguesa (navbar móvil, ver Header.jsx): antes era un <button>
+   sin estilo propio, así que en Android/Chrome se veía el highlight de tap
+   nativo (recuadro cian sólido) pegado después de cada toque — no era un
+   :focus real, era -webkit-tap-highlight-color por defecto. Mismo lenguaje
+   de vidrio que el resto del navbar (.ds-social-btn/.ds-header-cta): fondo
+   sutil, borde redondeado, sin outline salvo con teclado. 44x44px (w-11
+   h-11 en el JSX) para el área táctil mínima recomendada. */
+.ds-hamburger-btn {
+  -webkit-tap-highlight-color: transparent;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  outline: none;
+  transition: background .2s ease, border-color .2s ease;
+}
+.ds-hamburger-btn:active { background: rgba(255,255,255,0.1); }
+.ds-hamburger-btn:focus-visible {
+  outline: 2px solid #38BDF8;
+  outline-offset: 3px;
+  border-color: rgba(56,189,248,0.4);
 }
 
 /* --- Scroll del chat del asistente (ver AssistantSection.jsx) --- la
