@@ -27,6 +27,14 @@ const Bg3DBackground = () => {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Fondo fijo detrás de TODA la landing: nunca sale de "viewport" por
+    // scroll (es position:fixed), así que un IntersectionObserver no tiene
+    // nada que pausar por posición — pero SÍ corría siempre, sin parar,
+    // incluso con la pestaña en segundo plano (encontrado midiendo rAF con
+    // la página scrolleada lejos de los 3 carruseles: ~28 llamadas/seg que
+    // no bajaban a 0 hasta activar prefers-reduced-motion). Con la pestaña
+    // oculta no hay nada que ver, así que se pausa igual que el resto.
+    const isMobile = window.matchMedia('(max-width: 640px)').matches;
 
     let W = 0, H = 0;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -57,7 +65,10 @@ const Bg3DBackground = () => {
     const sprNear = mkSprite('rgba(255,255,255,1)', 'rgba(0,212,255,0.6)');
     const sprFar = mkSprite('rgba(140,200,255,0.9)', 'rgba(30,144,255,0.35)');
 
-    const COLS = 44, ROWS = 16, FOV = 420;
+    // Sólo en móvil: menos nodos (menos sprites por frame = menos costo de
+    // canvas2D/composición en GPUs de gama media/baja). Desktop intacto
+    // (44x16=704 nodos, igual que siempre).
+    const COLS = isMobile ? 26 : 44, ROWS = isMobile ? 10 : 16, FOV = 420;
     let mx = 0, my = 0, smx = 0, smy = 0;
     const onMouseMove = (e) => {
       mx = (e.clientX / window.innerWidth) * 2 - 1;
@@ -109,15 +120,28 @@ const Bg3DBackground = () => {
       ctx.globalAlpha = 1;
       ctx.restore();
       // prefers-reduced-motion: un solo frame estático, sin loop de rAF.
-      if (!reduceMotion) raf = requestAnimationFrame(frame);
+      // document.hidden: con la pestaña en segundo plano no hay nada que
+      // ver, así que no seguimos dibujando (se retoma solo al volver).
+      if (!reduceMotion && !document.hidden) raf = requestAnimationFrame(frame);
+      else raf = 0;
     };
     raf = requestAnimationFrame(frame);
+
+    const onVisibilityChange = () => {
+      // Al volver de segundo plano, si el loop se había parado (raf===0
+      // porque la última frame() salió sin re-programarse), retomarlo.
+      if (!document.hidden && !reduceMotion && alive && !raf) {
+        raf = requestAnimationFrame(frame);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
       alive = false;
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', resize);
       window.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, []);
 

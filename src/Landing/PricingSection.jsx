@@ -223,8 +223,8 @@ const PricingSection = () => {
                       <div data-cf-glare className="absolute inset-0 opacity-0 transition-opacity duration-300" style={{ mixBlendMode: "overlay" }} />
                     </div>
                     <GlassFloor variant="full" />
-                    <GlassReflection variant="full" sizeStyle={faceStyle}>
-                      <div className="flex flex-col box-border w-full h-full">{cardContent}</div>
+                    <GlassReflection variant="full" sizeStyle={faceStyle} noContent={isMobile}>
+                      {!isMobile && <div className="flex flex-col box-border w-full h-full">{cardContent}</div>}
                     </GlassReflection>
                     <GlassContactLight variant="full" />
                   </div>

@@ -90,6 +90,9 @@ const CSS_TEXT = `
   background: radial-gradient(ellipse 55% 50% at 50% 42%, rgba(37,99,235,0.16) 0%, rgba(37,99,235,0.05) 45%, transparent 72%);
   filter: blur(50px);
 }
+@media (max-width: 640px) {
+  .ind-halo { filter: blur(25px); }
+}
 /* Sin overflow-x/y en .ind-track a propósito: si un eje es no-visible (ej.
    hidden) y el otro queda en 'visible' -aunque se declare explícito-, el
    navegador computa igual el otro eje como 'auto' (quirk real de CSS
@@ -233,7 +236,7 @@ export default function IndustryGrid({
       pos: initial, target: initial, vel: 0, raf: 0, lastFrameAt: 0,
       dragging: false, moved: false, tiltCard: -1, tiltX: 0, tiltY: 0,
       userPaused: !autoplay || rm, pointerInside: false, hasFocus: false,
-      inViewport: true, lastInteractionAt: -Infinity,
+      inViewport: true, lastInteractionAt: -Infinity, lastRenderedPos: null,
     };
     engineRef.current = eng;
 
@@ -287,14 +290,14 @@ export default function IndustryGrid({
         // las laterales en profundidad para que dejen de pisar a la central.
         const z = ad * zMult + (tilt ? 40 : 0);
         const sc = Math.max(0.6, 1 - ad * 0.18);
-        // Blur progresivo: nítido en el centro, más en las laterales; tope
-        // 6px en desktop, 2px en móvil (ver misma nota en useCoverflow.js).
-        const blurCap = isMobile ? 2 : 6;
-        const blurPerAd = isMobile ? 1.2 : 3;
-        const blurPx = Math.min(blurCap, ad * blurPerAd);
+        // Blur en desktop (hasta 6px en las lejanas); en móvil se ELIMINA
+        // del todo (ver misma nota en useCoverflow.js).
+        const blurPx = isMobile ? 0 : Math.min(6, ad * 3);
         const edge = Math.max(0, 1 - ad);
         const el = cards[i];
-        el.style.transform = `translate(-50%,-50%) translateX(${(d * g).toFixed(1)}px) translateZ(${z.toFixed(1)}px) rotateY(${rotY.toFixed(2)}deg) rotateX(${rotX.toFixed(2)}deg) scale(${sc.toFixed(3)})`;
+        // Transform redondeado a 1 decimal en los 5 componentes (ver misma
+        // nota en useCoverflow.js).
+        el.style.transform = `translate(-50%,-50%) translateX(${(d * g).toFixed(1)}px) translateZ(${z.toFixed(1)}px) rotateY(${rotY.toFixed(1)}deg) rotateX(${rotX.toFixed(1)}deg) scale(${sc.toFixed(1)})`;
         el.style.opacity = String(+opacityFor(ad).toFixed(3));
         el.style.filter = blurPx > 0.05 ? `blur(${blurPx.toFixed(2)}px)` : "";
         el.style.zIndex = String(200 - Math.round(ad * 15));
@@ -359,10 +362,16 @@ export default function IndustryGrid({
         if (!autoplaying && Math.abs(eng.vel) < 0.0008 && Math.abs(eng.target - eng.pos) < 0.0008) {
           eng.pos = eng.target;
           render();
+          eng.lastRenderedPos = eng.pos;
           syncActiveIndex();
           return;
         }
-        render();
+        // Ver misma nota en useCoverflow.js: no reescribir estilos si el
+        // cambio de posición es imperceptible (<0.001).
+        if (eng.lastRenderedPos === null || Math.abs(eng.pos - eng.lastRenderedPos) >= 0.001) {
+          render();
+          eng.lastRenderedPos = eng.pos;
+        }
         syncActiveIndex();
         eng.raf = requestAnimationFrame(step);
       };
@@ -513,12 +522,13 @@ export default function IndustryGrid({
 
     let io = null;
     if ("IntersectionObserver" in window) {
+      // rootMargin generoso (ver misma nota en useCoverflow.js).
       io = new IntersectionObserver((entries) => {
         const entry = entries[0];
         if (!entry) return;
         eng.inViewport = entry.isIntersecting;
         if (eng.inViewport) ensureLoop();
-      }, { threshold: 0.2 });
+      }, { threshold: 0.2, rootMargin: "200px" });
       io.observe(root);
     }
 
@@ -539,6 +549,7 @@ export default function IndustryGrid({
     window.addEventListener("resize", onResize);
 
     render();
+    eng.lastRenderedPos = eng.pos;
     syncActiveIndex();
     if (!eng.userPaused) ensureLoop();
 
@@ -631,8 +642,8 @@ export default function IndustryGrid({
                     <div data-cf-glare className="absolute inset-0 opacity-0 transition-opacity duration-300" style={{ mixBlendMode: "overlay" }} />
                   </article>
                   <GlassFloor variant="full" />
-                  <GlassReflection variant="full" sizeStyle={faceStyle}>
-                    <div className="flex flex-col w-full h-full" style={{ boxSizing: "border-box" }}>{cardVisual}</div>
+                  <GlassReflection variant="full" sizeStyle={faceStyle} noContent={isMobile}>
+                    {!isMobile && <div className="flex flex-col w-full h-full" style={{ boxSizing: "border-box" }}>{cardVisual}</div>}
                   </GlassReflection>
                   <GlassContactLight variant="full" />
                 </div>

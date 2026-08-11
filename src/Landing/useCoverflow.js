@@ -99,7 +99,7 @@ export default function useCoverflow(count, initial = 0, options = {}) {
       pos: initial, target: initial, vel: 0, raf: 0, lastFrameAt: 0,
       dragging: false, moved: false, tiltCard: -1, tiltX: 0, tiltY: 0,
       userPaused: !autoplay || rm, pointerInside: false, hasFocus: false,
-      inViewport: true, lastInteractionAt: -Infinity,
+      inViewport: true, lastInteractionAt: -Infinity, lastRenderedPos: null,
     };
     engineRef.current = eng;
 
@@ -156,15 +156,17 @@ export default function useCoverflow(count, initial = 0, options = {}) {
         // que dejen de "pisar" visualmente a la tarjeta central.
         const z = ad * zMult + (tilt ? 40 : 0);
         const sc = Math.max(0.6, 1 - ad * 0.18);
-        // Blur progresivo: nítido en el centro, más en las laterales. En
-        // desktop llega a 6px (ad~2+); en móvil el tope es 2px — un blur
-        // grande sobre varias tarjetas grandes a la vez es caro en GPUs de
-        // gama media/baja.
-        const blurCap = isMobile ? 2 : 6;
-        const blurPerAd = isMobile ? 1.2 : 3;
-        const blurPx = Math.min(blurCap, ad * blurPerAd);
+        // Blur progresivo en desktop (nítido en el centro, hasta 6px en las
+        // lejanas). En móvil el blur se ELIMINA del todo: filter:blur()
+        // sobre elementos con transform 3D es de lo más caro en GPU móvil,
+        // y la opacidad+escala ya comunican la profundidad sin él.
+        const blurPx = isMobile ? 0 : Math.min(6, ad * 3);
         const el = cards[i];
-        el.style.transform = `translate(-50%,-50%) translateX(${(d * g).toFixed(1)}px) translateZ(${z.toFixed(1)}px) rotateY(${rotY.toFixed(2)}deg) rotateX(${rotX.toFixed(2)}deg) scale(${sc.toFixed(3)})`;
+        // Transform redondeado a 1 decimal en los 5 componentes (antes
+        // rotateY/rotateX/scale tenían más precisión que translateX/Z):
+        // mismo resultado visual, menos bytes de string y menos variación
+        // de un frame al otro por microcambios de sub-píxel.
+        el.style.transform = `translate(-50%,-50%) translateX(${(d * g).toFixed(1)}px) translateZ(${z.toFixed(1)}px) rotateY(${rotY.toFixed(1)}deg) rotateX(${rotX.toFixed(1)}deg) scale(${sc.toFixed(1)})`;
         el.style.opacity = String(+opacityFor(ad).toFixed(3));
         el.style.filter = blurPx > 0.05 ? `blur(${blurPx.toFixed(2)}px)` : '';
         el.style.zIndex = String(100 - Math.round(ad * 15));
@@ -239,10 +241,18 @@ export default function useCoverflow(count, initial = 0, options = {}) {
         if (!autoplaying && Math.abs(eng.vel) < 0.0008 && Math.abs(eng.target - eng.pos) < 0.0008) {
           eng.pos = eng.target;
           render();
+          eng.lastRenderedPos = eng.pos;
           syncActiveIndex();
           return;
         }
-        render();
+        // Si la posición cambió menos de 0.001 desde el último frame
+        // pintado, no reescribir estilos — un microcambio así no se nota
+        // (es un settle terminando de converger) pero sí sale caro repetir
+        // recalculo de estilo/layout/paint en cada rAF por nada.
+        if (eng.lastRenderedPos === null || Math.abs(eng.pos - eng.lastRenderedPos) >= 0.001) {
+          render();
+          eng.lastRenderedPos = eng.pos;
+        }
         syncActiveIndex();
         eng.raf = requestAnimationFrame(step);
       };
@@ -397,12 +407,15 @@ export default function useCoverflow(count, initial = 0, options = {}) {
 
     let io = null;
     if ('IntersectionObserver' in window) {
+      // rootMargin generoso: entra/sale del estado "visible" un poco antes
+      // de cruzar el borde real del viewport, así no hay un frame en seco
+      // arrancando/parando justo cuando el usuario ya está viéndolo.
       io = new IntersectionObserver((entries) => {
         const entry = entries[0];
         if (!entry) return;
         eng.inViewport = entry.isIntersecting;
         if (eng.inViewport) ensureLoop();
-      }, { threshold: 0.2 });
+      }, { threshold: 0.2, rootMargin: '200px' });
       io.observe(root);
     }
 
@@ -423,6 +436,7 @@ export default function useCoverflow(count, initial = 0, options = {}) {
     window.addEventListener('resize', onResize);
 
     render();
+    eng.lastRenderedPos = eng.pos;
     syncActiveIndex();
     if (!eng.userPaused) ensureLoop();
 

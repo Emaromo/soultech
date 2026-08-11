@@ -75,7 +75,12 @@ const ServicesSection = () => {
     return () => mq.removeEventListener("change", update);
   }, []);
 
-  const { containerRef, activeIndex, next, prev, goTo, isPlaying, togglePlay, reducedMotion } = useCoverflow(services.length, 2, { gapMult: cardGapMultFor(isMobile), isMobile });
+  // Autoplay apagado en móvil: es el único de los 3 carruseles que lo tiene
+  // activo, y en touch el usuario ya desliza con el dedo — una rotación
+  // automática ahí es sólo batería/CPU sin necesidad real. El botón de
+  // play/pausa se oculta abajo junto con esto (no tiene sentido dejarlo si
+  // no hay nada que arrancar).
+  const { containerRef, activeIndex, next, prev, goTo, isPlaying, togglePlay, reducedMotion } = useCoverflow(services.length, 2, { gapMult: cardGapMultFor(isMobile), isMobile, autoplay: !isMobile });
 
   return (
     <section id="servicios" className="relative overflow-hidden py-28 px-6 lg:px-20" style={{ scrollMarginTop: 80 }}>
@@ -167,8 +172,8 @@ const ServicesSection = () => {
                       <div data-cf-glare className="absolute inset-0 opacity-0 transition-opacity duration-300" style={{ mixBlendMode: "overlay" }} />
                     </div>
                     <GlassFloor variant="full" />
-                    <GlassReflection variant="full" sizeStyle={faceStyle}>
-                      <div className="flex flex-col box-border w-full h-full">{cardContent}</div>
+                    <GlassReflection variant="full" sizeStyle={faceStyle} noContent={isMobile}>
+                      {!isMobile && <div className="flex flex-col box-border w-full h-full">{cardContent}</div>}
                     </GlassReflection>
                     <GlassContactLight variant="full" />
                   </div>
@@ -209,7 +214,9 @@ const ServicesSection = () => {
             >
               <ChevronRight className="w-[18px] h-[18px]" />
             </button>
-            {!reducedMotion && (
+            {/* En móvil no hay autoplay que pausar/reanudar (ver arriba), así
+                que el botón directamente no tiene sentido ahí. */}
+            {!reducedMotion && !isMobile && (
               <button
                 onClick={togglePlay}
                 aria-label={isPlaying ? "Pausar rotación automática" : "Reanudar rotación automática"}

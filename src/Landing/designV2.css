@@ -281,7 +281,7 @@ a.ds-project-card:focus-visible { outline: 2px solid #38BDF8; outline-offset: 4p
   filter: blur(60px);
 }
 @media (max-width: 640px) {
-  .ds-carousel-halo { filter: blur(40px); }
+  .ds-carousel-halo { filter: blur(25px); }
 }
 
 @keyframes dsBlink {
@@ -554,6 +554,10 @@ a.ds-project-card:focus-visible { outline: 2px solid #38BDF8; outline-offset: 4p
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
   border: 1.5px solid rgba(255,255,255, calc(0.9 * var(--edge, 1)));
+  /* --edge (1=tarjeta activa/central, ~0.25=lateral inmediata, 0=lejana)
+     ya llega calculado desde cada motor de carrusel (o fijo en las
+     grillas/paneles estáticos) — reusarlo acá escala el blur igual que el
+     borde/glow, sin duplicar la variable. */
   box-shadow:
     0 0 20px rgba(255,255,255, calc(0.35 * var(--edge, 1))),
     0 0 60px rgba(255,255,255, calc(0.12 * var(--edge, 1))),
@@ -676,6 +680,19 @@ a.ds-project-card:focus-visible { outline: 2px solid #38BDF8; outline-offset: 4p
      opacidad reducida (mismo factor de --edge, 25% menos intensidad). */
   .ds-glass-reflection { filter: blur(calc(1.5px + (1 - var(--edge, 1)) * 2px)) brightness(0.7) saturate(1.2); }
   .ds-glass-reflection { opacity: calc(var(--refl-op, 0.22) * 0.75 * (0.22 + 0.78 * var(--edge, 1))); }
+  /* backdrop-filter: blur(16px) es de lo más caro que hay con varias
+     tarjetas de vidrio en pantalla a la vez. En móvil baja a un tope de
+     8px, y ESE tope además se escala por --edge: 8px en la tarjeta
+     central/activa (edge=1), ~2px en las laterales inmediatas (edge~0.25),
+     ~0px en las lejanas (edge~0) — "desactivado en las laterales, sólo en
+     la central" sin un salto brusco. Mismo mecanismo en tarjetas de
+     grilla/paneles estáticos (Proyectos/Proceso/Contacto/Asistente), que
+     ya traen su propio --edge de reposo — ahí da un blur bajo pero no
+     nulo, consistente con el resto. */
+  .ds-glass-face {
+    backdrop-filter: blur(calc(8px * var(--edge, 1))) saturate(140%);
+    -webkit-backdrop-filter: blur(calc(8px * var(--edge, 1))) saturate(140%);
+  }
 }
 
 .mz-particles { position: absolute; inset: -6%; pointer-events: none; }

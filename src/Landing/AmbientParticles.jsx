@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 // Generador pseudoaleatorio determinístico (misma fórmula para toda la app,
 // así cada sección tiene un patrón de partículas estable entre renders).
@@ -25,8 +25,37 @@ const AmbientParticles = ({ count = 14, seed = 0 }) => {
     [count, seed]
   );
 
+  // Son animaciones CSS puras (corren en el compositor, no en el hilo
+  // principal) pero de todas formas siguen "vivas" fuera de pantalla si no
+  // se pausan explícitamente. IntersectionObserver propio (rootMargin
+  // generoso, igual criterio que los carruseles) + visibilitychange, sin
+  // desmontar los nodos (así no se reinicia el ciclo al volver a verlas).
+  const wrapRef = useRef(null);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el || !('IntersectionObserver' in window)) return undefined;
+    let inViewport = true;
+    const update = () => setPaused(!inViewport || document.hidden);
+    const io = new IntersectionObserver(
+      (entries) => {
+        inViewport = entries[0]?.isIntersecting ?? true;
+        update();
+      },
+      { rootMargin: '200px' }
+    );
+    io.observe(el);
+    const onVisibility = () => update();
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      io.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, []);
+
   return (
-    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+    <div ref={wrapRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
       {particles.map((p, i) => (
         <div
           key={i}
@@ -40,6 +69,7 @@ const AmbientParticles = ({ count = 14, seed = 0 }) => {
             width: `${p.size}px`,
             height: `${p.size}px`,
             animation: `dsFloatUp ${p.dur}s linear ${p.delay}s infinite`,
+            animationPlayState: paused ? 'paused' : 'running',
           }}
         />
       ))}

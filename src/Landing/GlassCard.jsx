@@ -115,8 +115,15 @@ export function GlassParticles({ seed, count = 10 }) {
  *     de esas secciones, ver REST_EDGE en cada componente.
  *   - subtle: reflejos puntuales más tenues (0.15 fijo, sin depender de edge).
  * @param {object} [sizeStyle] mismo padding/aspectRatio/minHeight que la cara real
+ * @param {boolean} [noContent] SOLO MÓVIL: no duplica el contenido (ícono,
+ *   título, texto, chips, botón) adentro del reflejo — deja sólo el marco
+ *   de vidrio (borde/glow/fondo). El reflejo ya iba muy atenuado y con
+ *   blur, así que casi no se nota, pero en un carrusel se ahorra la mitad
+ *   de los nodos DOM por tarjeta (3 carruseles × varias tarjetas visibles
+ *   a la vez, con blur+3D encima). `children` se sigue recibiendo (lo usa
+ *   la cara real) pero no se monta acá adentro.
  */
-export function GlassReflection({ variant = "full", sizeStyle, children }) {
+export function GlassReflection({ variant = "full", sizeStyle, children, noContent = false }) {
   if (variant === "off") return null;
   const baseOpacity = { subtle: 0.15, full: 0.35, grid: 0.47 }[variant] ?? 0.35;
   return (
@@ -133,7 +140,7 @@ export function GlassReflection({ variant = "full", sizeStyle, children }) {
           .ds-glass-face) debe seguir leyéndose; el CONTENIDO (ícono, texto,
           chips, bullets) va extra atenuado para que no se lea como texto
           invertido — ver .ds-reflection-content en designV2.css. */}
-      <div className="ds-reflection-content">{children}</div>
+      {!noContent && <div className="ds-reflection-content">{children}</div>}
     </div>
   );
 }
