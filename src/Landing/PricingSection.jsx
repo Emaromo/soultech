@@ -211,7 +211,13 @@ const PricingSection = () => {
                   aria-roledescription="slide"
                   aria-label={`${p.title}, ${i + 1} de ${plans.length}`}
                   className="absolute left-1/2 top-1/2"
-                  style={{ width: isMobile ? PLANES_CARD_WIDTH_MOBILE : "min(330px,76vw)", willChange: "transform, opacity" }}
+                  style={{
+                    width: isMobile ? PLANES_CARD_WIDTH_MOBILE : "min(330px,76vw)",
+                    // En desktop, will-change queda fijo como siempre. En
+                    // móvil lo activa/desactiva el motor (useCoverflow.js)
+                    // sólo mientras hay movimiento — ver render(moving).
+                    ...(isMobile ? {} : { willChange: "transform, opacity" }),
+                  }}
                 >
                   <div className="ds-cf-inner">
                     <div

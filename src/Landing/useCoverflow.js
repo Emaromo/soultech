@@ -3,6 +3,16 @@ import { emitBurst } from './particles/particleEngine';
 
 const GRACE_MS = 2000;
 
+// Punto 5 (sólo móvil): en vez de animar el spring JS frame a frame durante
+// el settle, el motor salta directo a la posición final y deja que ESTA
+// transición CSS interpole el cambio de transform en el compositor — cero
+// JS corriendo durante la animación en sí. Medido con CPU 4x: ajustar el
+// spring (k/damp/umbral) bajó la cantidad de frames necesarios pero no el
+// costo de cada uno bajo el hilo principal saturado, así que seguía
+// entrecortado; esto saca el rAF de la ecuación por completo para el
+// settle (el arrastre en sí sigue 1:1 con el dedo, sin transición).
+const MOBILE_CSS_TRANSITION = 'transform 400ms cubic-bezier(0.22, 1, 0.36, 1)';
+
 // Distancia circular con signo: para N tarjetas, la diferencia i-pos
 // "envuelve" por el lado más corto (ej. con N=7, ir de la 6 a la 0 es +1,
 // no -6). Se usa tanto para el render (rotY/z/opacidad por distancia) como
@@ -137,7 +147,13 @@ export default function useCoverflow(count, initial = 0, options = {}) {
       root.setAttribute('aria-live', autoplaying ? 'off' : 'polite');
     };
 
-    const render = () => {
+    // moving=true: SOLO EN MÓVIL, mientras el spring está activo (arrastre
+    // o settle sin terminar) — se saltea el shine (única "extra" que este
+    // motor escribe por tarjeta además de transform/opacity/etc). Se
+    // vuelve a escribir en el frame final (moving=false) así no queda
+    // desincronizado tras la transición.
+    const render = (moving = false) => {
+      const skipExtras = isMobile && moving;
       const g = gap();
       for (let i = 0; i < N; i++) {
         const d = loop ? wrapDelta(i - eng.pos, N) : (i - eng.pos);
@@ -183,12 +199,21 @@ export default function useCoverflow(count, initial = 0, options = {}) {
         // de móvil a desktop (resize/rotación) el 'none' de la corrida
         // anterior queda pegado, porque esta rama nunca lo volvería a tocar.
         el.style.display = (isMobile && ad >= 1.5) ? 'none' : '';
+        // will-change dinámico SOLO en móvil (en desktop lo sigue poniendo
+        // el JSX, fijo, como siempre): activarlo únicamente mientras hay
+        // movimiento evita que cada tarjeta visible mantenga su propia capa
+        // de GPU todo el tiempo — con varias tarjetas de vidrio+blur, eso
+        // satura memoria de video en gama media/baja. Se limpia solo (moving
+        // pasa a false en el frame final del settle).
+        if (isMobile) el.style.willChange = (moving && ad < 1.5) ? 'transform, opacity' : 'auto';
         el.setAttribute('aria-hidden', ad < 0.5 ? 'false' : 'true');
         // Proximidad al centro (1 = tarjeta activa, 0 = lejana): alimenta el
         // glow del borde blanco (--edge) en las tarjetas de vidrio.
         el.style.setProperty('--edge', String(Math.max(0, 1 - ad * 0.75).toFixed(3)));
-        const sh = shineEls[i];
-        if (sh) sh.style.opacity = (!rm && ad < 0.25) ? '1' : '0';
+        if (!skipExtras) {
+          const sh = shineEls[i];
+          if (sh) sh.style.opacity = (!rm && ad < 0.25) ? '1' : '0';
+        }
       }
     };
 
@@ -213,8 +238,14 @@ export default function useCoverflow(count, initial = 0, options = {}) {
         // "salte" tras un frame largo; el drift de autoplay usa rawDt sin
         // recortar, así el ritmo de ~3.5s/tarjeta se cumple en tiempo real
         // aunque el rAF venga más lento de lo normal (pestaña ocupada,
-        // pantalla de bajo refresh, etc.).
-        const dt = Math.min(50, rawDt);
+        // pantalla de bajo refresh, etc.). En móvil el techo es más alto
+        // (100ms en vez de 50ms): medido con CPU 4x throttle, los frames
+        // durante una transición llegan a tardar 100-150ms reales — con el
+        // techo en 50ms el spring subestimaba el tiempo transcurrido y
+        // necesitaba MÁS frames reales para converger (más ventana de
+        // jank). Con el techo más alto, el spring "sabe" cuánto tardó de
+        // verdad y cierra antes.
+        const dt = Math.min(isMobile ? 100 : 50, rawDt);
         eng.lastFrameAt = now;
 
         const autoplaying = shouldAutoplay(now);
@@ -232,13 +263,23 @@ export default function useCoverflow(count, initial = 0, options = {}) {
         // se escalan por dt para que el settle y el autoplay se vean igual
         // de rápido en pantallas/tabs con otro refresh rate o con el rAF
         // momentáneamente más lento (si no, con menos frames por segundo la
-        // rotación "1 tarjeta cada 3.5s" se percibiría más lenta).
+        // rotación "1 tarjeta cada 3.5s" se percibiría más lenta). En móvil,
+        // k/damp más rígidos (0.16/0.75 vs 0.09/0.8): la transición dura
+        // menos frames en total, así que hay menos ventana para que se note
+        // el jank aunque cada frame individual siga costando lo mismo.
         const fs = dt / 16.6667;
-        const k = (rm ? 0.3 : 0.09) * fs, damp = Math.pow(rm ? 0.55 : 0.8, fs);
+        const kBase = rm ? 0.3 : (isMobile ? 0.16 : 0.09);
+        const dampBase = rm ? 0.55 : (isMobile ? 0.75 : 0.8);
+        const k = kBase * fs, damp = Math.pow(dampBase, fs);
         eng.vel = (eng.vel + (eng.target - eng.pos) * k) * damp;
         eng.pos += eng.vel * fs;
 
-        if (!autoplaying && Math.abs(eng.vel) < 0.0008 && Math.abs(eng.target - eng.pos) < 0.0008) {
+        // Umbral de corte: en móvil, más alto (0.004 vs 0.0008) — esa cola
+        // final del settle no se nota visualmente pero sí alarga cuántos
+        // frames más sigue corriendo el rAF (y en un hilo ya saturado, cada
+        // frame de más importa).
+        const settleThreshold = isMobile ? 0.004 : 0.0008;
+        if (!autoplaying && Math.abs(eng.vel) < settleThreshold && Math.abs(eng.target - eng.pos) < settleThreshold) {
           eng.pos = eng.target;
           render();
           eng.lastRenderedPos = eng.pos;
@@ -250,7 +291,7 @@ export default function useCoverflow(count, initial = 0, options = {}) {
         // (es un settle terminando de converger) pero sí sale caro repetir
         // recalculo de estilo/layout/paint en cada rAF por nada.
         if (eng.lastRenderedPos === null || Math.abs(eng.pos - eng.lastRenderedPos) >= 0.001) {
-          render();
+          render(true);
           eng.lastRenderedPos = eng.pos;
         }
         syncActiveIndex();
@@ -266,8 +307,36 @@ export default function useCoverflow(count, initial = 0, options = {}) {
       graceTimer = setTimeout(() => { graceTimer = null; ensureLoop(); }, GRACE_MS + 30);
     };
 
+    // Sólo móvil: prende/apaga la transición CSS en las N tarjetas.
+    // Apagada durante el arrastre real (sigue al dedo 1:1, sin lag);
+    // prendida antes de cualquier salto programático (settle, goTo,
+    // botones, dots) para que ESE cambio de transform se interpole solo.
+    const setCssTransition = (enabled) => {
+      const value = enabled ? MOBILE_CSS_TRANSITION : 'none';
+      for (let i = 0; i < N; i++) cards[i].style.transition = value;
+    };
+
     const settleTo = (targetPos) => {
       markInteraction();
+      if (isMobile) {
+        // Salta directo a la tarjeta más cercana (misma lógica de
+        // redondeo/clamping que ya usaba el motor) y deja que la
+        // transición CSS anime el cambio de transform — nada de spring
+        // JS por frame acá. eng.vel en 0 para no arrastrar inercia
+        // residual de un drag anterior al siguiente step() (ver
+        // markInteraction, que igual programa uno de cortesía).
+        const target = loop
+          ? Math.round(targetPos)
+          : Math.max(0, Math.min(N - 1, Math.round(targetPos)));
+        setCssTransition(true);
+        eng.vel = 0;
+        eng.pos = target;
+        eng.target = target;
+        render();
+        eng.lastRenderedPos = eng.pos;
+        syncActiveIndex();
+        return;
+      }
       eng.target = targetPos;
       syncActiveIndex();
       ensureLoop();
@@ -296,6 +365,10 @@ export default function useCoverflow(count, initial = 0, options = {}) {
     const onPointerDown = (e) => {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       eng.dragging = true; eng.moved = false; vfilt = 0;
+      // Apaga la transición CSS mientras se arrastra: tiene que seguir al
+      // dedo 1:1 en cada pointermove, no interpolar con retraso hacia cada
+      // posición intermedia.
+      if (isMobile) setCssTransition(false);
       markInteraction();
       if (eng.raf) { cancelAnimationFrame(eng.raf); eng.raf = 0; }
       lastX = e.clientX; lastT = performance.now();
@@ -312,7 +385,7 @@ export default function useCoverflow(count, initial = 0, options = {}) {
         vfilt = vfilt * 0.7 + (dpos / dt * 16) * 0.3;
         lastX = e.clientX; lastT = now;
         eng.tiltCard = -1;
-        render();
+        render(true);
       } else if (!rm && hoverCapable) {
         const ci = wrapIdx(eng.pos);
         const c = cards[ci];
@@ -437,6 +510,10 @@ export default function useCoverflow(count, initial = 0, options = {}) {
 
     render();
     eng.lastRenderedPos = eng.pos;
+    // Recién DESPUÉS del primer render: si se prendiera antes, ese primer
+    // pintado (de "nada" al estado inicial) podría animarse solo, con las
+    // tarjetas "entrando" desde quién sabe dónde.
+    if (isMobile) setCssTransition(true);
     syncActiveIndex();
     if (!eng.userPaused) ensureLoop();
 

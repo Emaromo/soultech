@@ -160,7 +160,13 @@ const ServicesSection = () => {
                   aria-roledescription="slide"
                   aria-label={`${s.title}, ${i + 1} de ${services.length}`}
                   className="absolute left-1/2 top-1/2"
-                  style={{ width: cardWidthFor(isMobile), willChange: "transform, opacity" }}
+                  style={{
+                    width: cardWidthFor(isMobile),
+                    // En desktop, will-change queda fijo como siempre. En
+                    // móvil lo activa/desactiva el motor (useCoverflow.js)
+                    // sólo mientras hay movimiento — ver render(moving).
+                    ...(isMobile ? {} : { willChange: "transform, opacity" }),
+                  }}
                 >
                   <div className="ds-cf-inner">
                     <div
