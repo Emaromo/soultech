@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import MarqueeLogos from "./MarqueeLogos";
 import useParticleHover from "./particles/useParticleHover";
@@ -13,6 +13,36 @@ const HeroSection = () => {
   const ctaRef = useRef(null);
   useParticleHover(ctaRef, { variant: "button" });
 
+  // Sólo móvil: el LCP (el <p> de abajo, "Desarrollamos soluciones...") vive
+  // encima de este video de fondo -- 13.8MB con autoPlay+preload="auto" que
+  // hoy se descarga siempre, compitiendo por ancho de banda/hilo principal
+  // justo en el camino crítico del primer pintado (medido: LCP 7.4s en el
+  // baseline de Lighthouse mobile). En móvil no se monta el <video> en
+  // absoluto -- el fondo cae al color base (.hero-bg-fade, ya presente
+  // detrás) en vez de un gradiente nuevo, mismo criterio que Footer.jsx.
+  // Desktop no se toca: sigue con el video siempre.
+  //
+  // Inicializador LAZY (función, no `useState(false)`): con `false` como
+  // valor inicial fijo, el primer render en móvil monta igual el <video>
+  // (isMobile todavía no se corrigió, eso pasa recién en el useEffect que
+  // corre DESPUÉS del primer commit) y el navegador ya arranca a
+  // descargarlo con autoPlay+preload="auto" — sacarlo del DOM un instante
+  // después no cancela esa descarga que ya empezó. Confirmado en la
+  // práctica: con `useState(false)` el video de 13.8MB seguía apareciendo
+  // en las network-requests de Lighthouse mobile pese a este mismo
+  // condicional. Con el inicializador lazy, `isMobile` ya es correcto en el
+  // primerísimo render (matchMedia corre sync, antes del primer paint), así
+  // que en móvil el <video> nunca llega a montarse ni una vez.
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const update = () => setIsMobile(mq.matches);
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
   return (
   <section
     className="relative flex flex-col overflow-visible text-white"
@@ -24,16 +54,18 @@ const HeroSection = () => {
         contenido (texto/CTA/marquee) NO lleva esta clase — sigue opaco. */}
     <div className="absolute inset-0 hero-bg-fade" style={{ background: "hsl(260,87%,3%)" }} />
     <div className="absolute inset-0 overflow-hidden hero-bg-fade">
-      <video
-        muted
-        playsInline
-        autoPlay
-        loop
-        preload="auto"
-        src={HERO_VIDEO_SRC}
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{ filter: "contrast(1.08) saturate(1.12) brightness(1.03)" }}
-      />
+      {!isMobile && (
+        <video
+          muted
+          playsInline
+          autoPlay
+          loop
+          preload="auto"
+          src={HERO_VIDEO_SRC}
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: "contrast(1.08) saturate(1.12) brightness(1.03)" }}
+        />
+      )}
       <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.05, backgroundImage: NOISE_BG, backgroundSize: "120px 120px" }} />
     </div>
 

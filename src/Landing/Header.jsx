@@ -58,8 +58,10 @@ const Header = () => {
                 siempre; en teléfonos angostos de verdad (isSmallPhone) se
                 achican escudo y wordmark juntos y proporcionalmente en vez
                 de sacar uno de los dos (ver .soultech-wordmark-img--sm). */}
+            {/* .webp, 600px (originalmente 1202px mostrado a 24-34px de alto —
+                optimización de performance mobile, 2026-08). */}
             <img
-              src="letras.png"
+              src="letras.webp"
               alt="Soul Tech"
               className={`soultech-wordmark-img${isSmallPhone ? " soultech-wordmark-img--sm" : ""}`}
             />

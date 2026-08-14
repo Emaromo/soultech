@@ -693,6 +693,16 @@ a.ds-project-card:focus-visible { outline: 2px solid #38BDF8; outline-offset: 4p
     backdrop-filter: blur(calc(8px * var(--edge, 1))) saturate(140%);
     -webkit-backdrop-filter: blur(calc(8px * var(--edge, 1))) saturate(140%);
   }
+  /* Refuerzo contra el parpadeo de los 3 carruseles (Precios/Servicios/
+     Rubros, ver useCoverflow.js/IndustryGrid.jsx): backface-visibility
+     ayuda al navegador a no sacar la tarjeta de su capa de compositor al
+     recalcular el transform 3D en cada frame de drag/settle. Ninguna
+     tarjeta rota más de ±42° en ningún carrusel, así que la cara trasera
+     nunca llega a verse — esto no cambia nada visible, sólo evita
+     recomposición de más. No toca transform (el motor ya escribe el
+     transform completo por-frame vía inline style; una regla CSS de
+     transform acá quedaría pisada igual). */
+  [data-cf-card] { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 }
 
 .mz-particles { position: absolute; inset: -6%; pointer-events: none; }

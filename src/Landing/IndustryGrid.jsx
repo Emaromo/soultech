@@ -237,8 +237,22 @@ export default function IndustryGrid({
       dragging: false, moved: false, tiltCard: -1, tiltX: 0, tiltY: 0,
       userPaused: !autoplay || rm, pointerInside: false, hasFocus: false,
       inViewport: true, lastInteractionAt: -Infinity, lastRenderedPos: null,
+      // Ver applyVisibility() más abajo — mismo patrón que useCoverflow.js.
+      lastHiddenCenter: null,
     };
     engineRef.current = eng;
+
+    // Con 3 tarjetas o menos nunca vale la pena ocultar nada con
+    // display:none (ver mismo criterio en useCoverflow.js) — hoy este
+    // componente siempre recibe 6 (industries, ver PricingSection.jsx),
+    // pero es un bloque reutilizable (ver docblock), así que el chequeo se
+    // deja genérico por si algún día se usa con menos items.
+    const N3OrLess = N <= 3;
+    // Al (re)montar (isMobile/N/etc. cambia, todos en las deps de abajo):
+    // limpiar cualquier display:none que haya quedado de una corrida
+    // anterior con otro valor de isMobile — el resto del ciclo de vida sólo
+    // toca display de forma incremental (ver applyVisibility).
+    for (let i = 0; i < N; i++) cards[i].style.display = "";
 
     // gapMult sale de cardTokens.js (compartido con ServicesSection) para
     // que la separación horizontal entre tarjetas sea idéntica en ambos
@@ -271,8 +285,26 @@ export default function IndustryGrid({
       root.setAttribute("aria-live", autoplaying ? "off" : "polite");
     };
 
+    // Mismo patrón/razón que useCoverflow.js (ver el comentario largo ahí):
+    // calcula qué tarjetas quedan fuera de la ventana visible a partir del
+    // índice activo REDONDEADO (eng.target), nunca de eng.pos (que se mueve
+    // frame a frame durante drag/settle) — así display sólo se reescribe
+    // cuando cambia la tarjeta activa, no en cada frame de render(), que
+    // era lo que causaba el parpadeo al deslizar.
+    const applyVisibility = () => {
+      if (N3OrLess || !isMobile) return;
+      const centerIdx = wrapIdx(eng.target);
+      if (centerIdx === eng.lastHiddenCenter) return;
+      eng.lastHiddenCenter = centerIdx;
+      for (let i = 0; i < N; i++) {
+        const d = loop ? wrapDelta(i - centerIdx, N) : (i - centerIdx);
+        cards[i].style.display = Math.abs(d) >= 1.5 ? "none" : "";
+      }
+    };
+
     const render = () => {
       const g = gap();
+      applyVisibility();
       for (let i = 0; i < N; i++) {
         const d = loop ? wrapDelta(i - eng.pos, N) : (i - eng.pos);
         const ad = Math.abs(d);
@@ -303,10 +335,10 @@ export default function IndustryGrid({
         el.style.zIndex = String(200 - Math.round(ad * 15));
         el.style.pointerEvents = ad > 1.1 ? "none" : "auto";
         el.style.visibility = ad >= 3 ? "hidden" : "visible";
-        // Sólo en móvil: display:none (no sólo visibility:hidden) para lo
-        // que no sea central + 2 adyacentes (ver misma nota en useCoverflow.js
-        // sobre por qué esta asignación es incondicional, no "if (isMobile)").
-        el.style.display = (isMobile && ad >= 1.5) ? "none" : "";
+        // display:none: ver applyVisibility() más arriba, llamada una sola
+        // vez al principio de este render() — con 3 tarjetas o menos nunca
+        // se toca (N3OrLess), con más sólo se reescribe cuando cambia el
+        // índice activo, nunca por-tarjeta en este loop.
         el.setAttribute("aria-hidden", ad < 0.5 ? "false" : "true");
         el.style.setProperty("--edge", edge.toFixed(3));
         const card = cardInnerEls[i];

@@ -94,6 +94,22 @@ export default function useCoverflow(count, initial = 0, options = {}) {
     // pantalla, así que un querySelector por tarjeta por frame sí pesa.
     const shineEls = cards.map((c) => c.querySelector('[data-cf-shine]'));
 
+    // Con 3 tarjetas o menos (ej. Precios) nunca vale la pena ocultar nada
+    // con display:none — opacity+visibility ya alcanzan para "esconder" una
+    // lateral, y a esta escala el único efecto real de display:none era el
+    // parpadeo (se reescribía en cada frame de drag/settle, invalidando la
+    // capa de compositor de la tarjeta cada vez). Ver render() más abajo.
+    const N3OrLess = N <= 3;
+    // Al (re)montar este efecto (primer mount, o cambio de isMobile/count/
+    // etc. — todos están en las deps de abajo): limpiar cualquier
+    // display:none que haya quedado de una corrida anterior con otro valor
+    // de isMobile. El resto del ciclo de vida de este efecto sólo TOCA
+    // display de forma incremental (ver applyVisibility en render()), nunca
+    // lo reescribe sin necesidad — así que sin este reset explícito, pasar
+    // de móvil a desktop (u otro cambio de deps) podría dejar una tarjeta
+    // pegada en display:none para siempre.
+    for (let i = 0; i < N; i++) cards[i].style.display = '';
+
     const rm = reducedMotion;
     // hover:hover + pointer:fine = mouse/trackpad real, nunca táctil (en
     // touch no existe hover de verdad y el puntero es "coarse"). Gatea
@@ -110,6 +126,10 @@ export default function useCoverflow(count, initial = 0, options = {}) {
       dragging: false, moved: false, tiltCard: -1, tiltX: 0, tiltY: 0,
       userPaused: !autoplay || rm, pointerInside: false, hasFocus: false,
       inViewport: true, lastInteractionAt: -Infinity, lastRenderedPos: null,
+      // Último índice "centro" (entero, redondeado) para el que ya se
+      // escribió display:none/'' — ver applyVisibility() en render(). null
+      // fuerza el primer cálculo real en el primer render().
+      lastHiddenCenter: null,
     };
     engineRef.current = eng;
 
@@ -147,6 +167,34 @@ export default function useCoverflow(count, initial = 0, options = {}) {
       root.setAttribute('aria-live', autoplaying ? 'off' : 'polite');
     };
 
+    // Sólo con más de 3 tarjetas (N3OrLess ya cubre el resto, ver arriba) y
+    // sólo en móvil: qué tarjetas caen fuera de la ventana visible (centro
+    // ±1, distancia >= 1.5), calculado a partir del índice activo
+    // REDONDEADO (eng.target) — nunca de eng.pos, que es lo que se mueve
+    // continuamente frame a frame durante un drag o un settle en curso. Por
+    // eso, durante un arrastre (que no toca eng.target hasta soltar, ver
+    // onPointerMove/endDrag más abajo) esto no reescribe nada — el conjunto
+    // oculto queda congelado tal cual estaba antes de arrastrar, y recién
+    // se recalcula UNA vez cuando el índice activo realmente cambia (goTo,
+    // settle completo, autoplay cruzando de una tarjeta a la siguiente).
+    // Es "calculado sólo cuando cambia el índice activo, nunca en el loop
+    // de render" — la única lectura por-frame es la comparación barata de
+    // abajo (centerIdx === eng.lastHiddenCenter), no una reescritura de
+    // estilo; antes, display se reescribía en CADA frame de render() según
+    // la distancia fraccional en curso, lo que invalidaba la capa de
+    // compositor de la tarjeta una y otra vez durante el propio gesto de
+    // deslizar — eso era el parpadeo.
+    const applyVisibility = () => {
+      if (N3OrLess || !isMobile) return;
+      const centerIdx = wrapIdx(eng.target);
+      if (centerIdx === eng.lastHiddenCenter) return;
+      eng.lastHiddenCenter = centerIdx;
+      for (let i = 0; i < N; i++) {
+        const d = loop ? wrapDelta(i - centerIdx, N) : (i - centerIdx);
+        cards[i].style.display = Math.abs(d) >= 1.5 ? 'none' : '';
+      }
+    };
+
     // moving=true: SOLO EN MÓVIL, mientras el spring está activo (arrastre
     // o settle sin terminar) — se saltea el shine (única "extra" que este
     // motor escribe por tarjeta además de transform/opacity/etc). Se
@@ -155,6 +203,7 @@ export default function useCoverflow(count, initial = 0, options = {}) {
     const render = (moving = false) => {
       const skipExtras = isMobile && moving;
       const g = gap();
+      applyVisibility();
       for (let i = 0; i < N; i++) {
         const d = loop ? wrapDelta(i - eng.pos, N) : (i - eng.pos);
         const ad = Math.abs(d);
@@ -191,21 +240,20 @@ export default function useCoverflow(count, initial = 0, options = {}) {
         // (no hay forma de "no montarla" desde este motor imperativo, pero
         // visibility:hidden + opacity 0 la saca por completo de pantalla).
         el.style.visibility = ad >= 3 ? 'hidden' : 'visible';
-        // Sólo en móvil: display:none (no sólo visibility:hidden) para todo
-        // lo que no sea central + 2 adyacentes — motor/browser dejan de
-        // pintar/componer esas tarjetas por completo en vez de sólo
-        // ocultarlas, que es lo caro en un carrusel con blur+3D+glass.
-        // Asignación incondicional (no "if (isMobile) ..."): si no, al pasar
-        // de móvil a desktop (resize/rotación) el 'none' de la corrida
-        // anterior queda pegado, porque esta rama nunca lo volvería a tocar.
-        el.style.display = (isMobile && ad >= 1.5) ? 'none' : '';
+        // display:none: ver applyVisibility() más arriba, llamada una sola
+        // vez al principio de este render() (no por-tarjeta acá adentro) —
+        // con 3 tarjetas o menos nunca se toca (N3OrLess corta ahí mismo);
+        // con más, sólo se reescribe cuando cambia el índice activo
+        // redondeado, nunca en cada frame de esta misma función.
         // will-change dinámico SOLO en móvil (en desktop lo sigue poniendo
-        // el JSX, fijo, como siempre): activarlo únicamente mientras hay
-        // movimiento evita que cada tarjeta visible mantenga su propia capa
-        // de GPU todo el tiempo — con varias tarjetas de vidrio+blur, eso
-        // satura memoria de video en gama media/baja. Se limpia solo (moving
-        // pasa a false en el frame final del settle).
-        if (isMobile) el.style.willChange = (moving && ad < 1.5) ? 'transform, opacity' : 'auto';
+        // el JSX, fijo, como siempre). Con 3 tarjetas o menos queda FIJO acá
+        // también (memoria de sobra para tan pocas, y evita el mismo
+        // re-layer constante que causaba el parpadeo de display); con más,
+        // sigue el criterio anterior: activo únicamente mientras hay
+        // movimiento, para no mantener la capa de GPU de cada tarjeta todo
+        // el tiempo con varias de vidrio+blur en pantalla (se limpia solo,
+        // moving pasa a false en el frame final del settle).
+        if (isMobile) el.style.willChange = (N3OrLess || (moving && ad < 1.5)) ? 'transform, opacity' : 'auto';
         el.setAttribute('aria-hidden', ad < 0.5 ? 'false' : 'true');
         // Proximidad al centro (1 = tarjeta activa, 0 = lejana): alimenta el
         // glow del borde blanco (--edge) en las tarjetas de vidrio.

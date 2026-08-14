@@ -60,14 +60,22 @@ const Footer = () => {
   const [newsEmail, setNewsEmail] = useState("");
   const [newsError, setNewsError] = useState("");
   const [subscribed, setSubscribed] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  // Inicializador LAZY (no `useState(false)`): este isMobile ahora decide
+  // si se monta el <video> de abajo (antes sólo afectaba tamaños/opacidad
+  // de partículas, donde un frame de más con el valor "equivocado" no
+  // importaba). Con `false` fijo, en móvil el primer render igual montaba
+  // el <video> con autoPlay+preload="auto" -- la descarga de 7MB ya
+  // arrancaba antes de que el useEffect corrigiera el valor y lo sacara del
+  // DOM. Mismo fix y misma razón que HeroSection.jsx (ver su comentario).
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches
+  );
   const subscribeBtnRef = useRef(null);
   useParticleHover(subscribeBtnRef, { variant: "button" });
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 640px)");
     const update = () => setIsMobile(mq.matches);
-    update();
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
   }, []);
@@ -93,16 +101,22 @@ const Footer = () => {
           y se reescribió todo el copy para Soul Tech. --- */}
       <div className="relative overflow-hidden min-h-screen flex flex-col">
         <div className="absolute inset-0" style={{ background: "#000" }} />
-        <video
-          muted
-          playsInline
-          autoPlay
-          loop
-          preload="auto"
-          src={FOOTER_CTA_VIDEO_SRC}
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
+        {/* Sólo desktop: en móvil, el fondo negro de arriba + el degradado de
+            abajo alcanzan (mismo criterio que HeroSection.jsx) -- este video
+            con autoPlay+preload="auto" se descargaba siempre (7MB) aunque
+            preload="none" no hubiera alcanzado igual por el autoPlay. */}
+        {!isMobile && (
+          <video
+            muted
+            playsInline
+            autoPlay
+            loop
+            preload="auto"
+            src={FOOTER_CTA_VIDEO_SRC}
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        )}
         <div
           className="absolute inset-0"
           style={{ background: "linear-gradient(to bottom, rgba(1,5,12,0.5) 0%, rgba(1,5,12,0.72) 55%, rgba(1,5,12,0.95) 100%)" }}
@@ -169,7 +183,9 @@ const Footer = () => {
         >
         <div data-reveal>
           <div className="flex items-center gap-2.5 mb-3">
-            <img src="soultech1.png" alt="Soul Tech" className="w-[34px] h-[34px] object-contain ds-logo-float" />
+            {/* .webp, 500px (originalmente 1334px mostrado a 34px — optimización de
+                performance mobile, 2026-08); ver mismo criterio en SoulTechLogo.jsx. */}
+            <img src="soultech1.webp" alt="Soul Tech" className="w-[34px] h-[34px] object-contain ds-logo-float" />
             <span className="text-[19px] font-extrabold text-white" style={{ filter: "drop-shadow(0 0 10px rgba(0,255,255,0.5))" }}>
               Soul<span className="text-cyan-400"> Tech</span>
             </span>

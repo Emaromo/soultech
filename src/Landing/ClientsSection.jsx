@@ -17,7 +17,13 @@ const projects = [
   // la misma marca "Comunity Tech". Confirmar stack real.
   {
     id: "comunity-tech",
-    images: ["/tiket1.jpg", "/Captur3.jpg", "/dashclient.jpg", "/login.jpg"],
+    // .webp (optimización de performance mobile, 2026-08): los originales
+    // (tiket1.jpg 1.7MB, Captur3.jpg 2.5MB, dashclient.jpg 2.5MB, login.jpg
+    // 2.8MB) eran screenshots sin comprimir a resolución nativa (~3800px de
+    // ancho) mostrados en una tarjeta de ~360-600px — reencodeados a WebP y
+    // redimensionados a 1200px de ancho (2-3x el ancho máximo real en
+    // pantalla), mismo encuadre/contenido visual, ~98% menos peso.
+    images: ["/tiket1.webp", "/Captur3.webp", "/dashclient.webp", "/login.webp"],
     alts: [
       "Landing pública de Comunity Tech, especialistas en reparación de notebooks y PC, con diagnóstico gratuito y seguimiento de ticket",
       "Panel de administración con lista de tickets de reparación, prioridades, precios y gráfico de tickets por mes",
@@ -34,7 +40,9 @@ const projects = [
   // de Akiabara (home + catálogo). Confirmar stack real (¿Tiendanube/Shopify?).
   {
     id: "akiabara",
-    images: ["/Captura.PNG", "/Captura1.PNG", "/Captura33.PNG"],
+    // .webp, mismo criterio que arriba (originales: Captura.PNG 6.8MB,
+    // Captura1.PNG 13.6MB(!), Captura33.PNG 3.7MB).
+    images: ["/Captura.webp", "/Captura1.webp", "/Captura33.webp"],
     alts: [
       "Página de inicio de Akiabara con banners de la colección Verano 25-26 y grilla de productos destacados",
       "Página de inicio de la tienda online de Akiabara con modelo luciendo un blazer rojo de la colección Verano 25-26",
@@ -48,7 +56,7 @@ const projects = [
   },
   {
     id: "panel-profesionales",
-    images: ["/psico.jpg"],
+    images: ["/psico.webp"], // .webp, mismo criterio (original 232KB)
     alts: ["Dashboard de seguimiento de clientes para profesionales independientes, con progreso de sesiones, estadísticas y próximas citas"],
     tag: "SAAS",
     title: "Panel para Profesionales",

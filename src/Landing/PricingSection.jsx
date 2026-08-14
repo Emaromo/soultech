@@ -214,8 +214,11 @@ const PricingSection = () => {
                   style={{
                     width: isMobile ? PLANES_CARD_WIDTH_MOBILE : "min(330px,76vw)",
                     // En desktop, will-change queda fijo como siempre. En
-                    // móvil lo activa/desactiva el motor (useCoverflow.js)
-                    // sólo mientras hay movimiento — ver render(moving).
+                    // móvil lo pone el motor (useCoverflow.js) — con 3
+                    // tarjetas o menos (este carrusel) queda FIJO ahí
+                    // también, nunca se desactiva (ver N3OrLess en
+                    // render()); con más tarjetas sí se activa/desactiva
+                    // sólo mientras hay movimiento.
                     ...(isMobile ? {} : { willChange: "transform, opacity" }),
                   }}
                 >

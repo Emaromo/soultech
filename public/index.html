@@ -14,7 +14,25 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+    <!-- Cargado sin bloquear el primer pintado (medido: ~830ms de
+         render-blocking en Lighthouse mobile con el <link rel="stylesheet">
+         síncrono de antes). Técnica estándar: se pide como "print" (no
+         bloquea, el navegador igual la descarga) y el onload la reactiva
+         como hoja real. &display=swap en la URL ya hacía que el texto no
+         quedara invisible mientras carga la fuente (usa el fallback hasta
+         que está lista); esto además evita que TODO el documento espere a
+         esta hoja de estilo (tiny, 1.2KB) antes de pintar cualquier cosa.
+         Mismo resultado final en ambas versiones, sólo cambia CUÁNDO
+         empieza a pintar el resto de la página. -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&display=swap" />
+    </noscript>
 
     <title>React App</title>
 

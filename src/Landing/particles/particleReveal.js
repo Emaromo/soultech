@@ -295,8 +295,10 @@ export function initParticleReveal(opts = {}) {
   };
   document.addEventListener('focusin', onFocusIn);
 
-  // --- estado inicial ---
-  document.querySelectorAll(selector).forEach((n) => {
+  // --- registro de un elemento (inicial o agregado después, ver MutationObserver
+  // más abajo) ---
+  const registerElement = (n) => {
+    if (n._pendingTimers) return; // ya registrado, no duplicar
     n._pendingTimers = [];
     const r = n.getBoundingClientRect();
     if (r.top > vh * 0.85) {                 // fuera de pantalla → animar
@@ -306,11 +308,31 @@ export function initParticleReveal(opts = {}) {
       setFinal(n);
     }
     io.observe(n);
+  };
+
+  // --- estado inicial ---
+  document.querySelectorAll(selector).forEach(registerElement);
+
+  // --- elementos agregados DESPUÉS del escaneo inicial (ej. secciones que
+  // montan diferido en móvil, ver LazyMobileSection.jsx) — sin esto, sus
+  // [data-reveal] nunca se registran acá y quedan sin la animación de
+  // entrada (aparecen directo, sin efecto — no invisibles, pero sí sin el
+  // detalle visual que sí tiene el resto de la página). */
+  const mo = new MutationObserver((mutations) => {
+    for (const m of mutations) {
+      for (const node of m.addedNodes) {
+        if (node.nodeType !== 1) continue; // solo Element
+        if (node.matches?.(selector)) registerElement(node);
+        node.querySelectorAll?.(selector).forEach(registerElement);
+      }
+    }
   });
+  mo.observe(document.body, { childList: true, subtree: true });
 
   // cleanup para React
   return () => {
     io.disconnect();
+    mo.disconnect();
     window.removeEventListener('resize', resize);
     document.removeEventListener('scroll', onScroll, true);
     document.removeEventListener('visibilitychange', onVisibility);

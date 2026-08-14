@@ -26,8 +26,14 @@ import React, { useEffect, useId, useRef } from "react";
 // Tamaño real en el navbar.
 const LOGO_SIZE = 48;
 
-// viewBox = coordenadas nativas de soultech1.png, así el trazado calibrado
-// por superposición se usa tal cual.
+// viewBox = coordenadas nativas de soultech1.png (1334x1376 -- el archivo
+// real (soultech1.webp) se reencodeó y redujo a 500px de ancho para
+// performance mobile (2026-08), pero IMG_W/IMG_H quedan en la resolución
+// ORIGINAL a propósito: <image> de SVG escala el source para llenar
+// width/height preservando el aspect-ratio (que no cambió, el resize fue
+// proporcional), así que el trazado de FLAME_D calibrado por superposición
+// sigue calzando exacto sin volver a calibrar nada — mostrado a 38-55px en
+// el navbar, 500px de source sigue siendo ~9x oversampling.
 const VIEWBOX = "0 0 1334 1376";
 const IMG_W = 1334;
 const IMG_H = 1376;
@@ -91,7 +97,7 @@ export default function SoulTechLogo({ size = LOGO_SIZE, className = "" }) {
         </defs>
 
         {/* 1. Escudo completo, estático — nunca se le toca filter/transform. */}
-        <image href="soultech1.png" x="0" y="0" width={IMG_W} height={IMG_H} aria-hidden="true" />
+        <image href="soultech1.webp" x="0" y="0" width={IMG_W} height={IMG_H} aria-hidden="true" />
 
         {/* 2/3/4/5. Solo la llama (recortada del mismo PNG vía mask), en un
             grupo que respira en escala; adentro, 3 copias con un glow cada
@@ -101,10 +107,10 @@ export default function SoulTechLogo({ size = LOGO_SIZE, className = "" }) {
           style={{ transformBox: "view-box", transformOrigin: `${FLAME_PIVOT_X}px ${FLAME_PIVOT_Y}px` }}
           aria-hidden="true"
         >
-          <image href="soultech1.png" x="0" y="0" width={IMG_W} height={IMG_H} mask={`url(#${maskId})`} className="soultech-flame-glow soultech-flame-glow--outer" />
-          <image href="soultech1.png" x="0" y="0" width={IMG_W} height={IMG_H} mask={`url(#${maskId})`} className="soultech-flame-glow soultech-flame-glow--mid" />
-          <image href="soultech1.png" x="0" y="0" width={IMG_W} height={IMG_H} mask={`url(#${maskId})`} className="soultech-flame-glow soultech-flame-glow--core" />
-          <image href="soultech1.png" x="0" y="0" width={IMG_W} height={IMG_H} mask={`url(#${maskId})`} className="soultech-flame-sharp" />
+          <image href="soultech1.webp" x="0" y="0" width={IMG_W} height={IMG_H} mask={`url(#${maskId})`} className="soultech-flame-glow soultech-flame-glow--outer" />
+          <image href="soultech1.webp" x="0" y="0" width={IMG_W} height={IMG_H} mask={`url(#${maskId})`} className="soultech-flame-glow soultech-flame-glow--mid" />
+          <image href="soultech1.webp" x="0" y="0" width={IMG_W} height={IMG_H} mask={`url(#${maskId})`} className="soultech-flame-glow soultech-flame-glow--core" />
+          <image href="soultech1.webp" x="0" y="0" width={IMG_W} height={IMG_H} mask={`url(#${maskId})`} className="soultech-flame-sharp" />
         </g>
       </svg>
     </span>
